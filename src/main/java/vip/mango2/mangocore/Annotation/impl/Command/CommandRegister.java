@@ -2,64 +2,60 @@ package vip.mango2.mangocore.Annotation.impl.Command;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.Plugin;
-import vip.mango2.mangocore.Annotation.Command;
-import vip.mango2.mangocore.Annotation.TabComplate;
+import vip.mango2.mangocore.Annotation.MangoCommand;
+import vip.mango2.mangocore.Annotation.MangoTabComplate;
+import vip.mango2.mangocore.MangoCore;
 import vip.mango2.mangocore.Utils.MessageUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class CommandRegister {
 
-    private Plugin plugin;
+    private final Plugin plugin;
 
     public CommandRegister(Plugin plugin) {
         this.plugin = plugin;
     }
 
-
     public void registerCommand(Object object) {
-        Map<String, DynamicCommand> tempCommands = new HashMap<>();
-
-        // Step 1: 创建DynamicCommand实例并存储在tempCommands映射中
         for (Method declaredMethod : object.getClass().getDeclaredMethods()) {
-            if (declaredMethod.isAnnotationPresent(Command.class)) {
-                Command annotation = declaredMethod.getAnnotation(Command.class);
+            if (declaredMethod.isAnnotationPresent(MangoCommand.class)) {
+                MangoCommand commandAnnotation = declaredMethod.getAnnotation(MangoCommand.class);
+
+                // 使用流来检查是否存在MangoTabComplete注解
+                Optional<Method> tabCompleteMethod = Arrays.stream(object.getClass().getDeclaredMethods())
+                        .filter(method -> method.isAnnotationPresent(MangoTabComplate.class))
+                        .filter(method -> {
+                            MangoTabComplate tabComplateAnnotation = method.getAnnotation(MangoTabComplate.class);
+                            return tabComplateAnnotation.command().equals(commandAnnotation.name());
+                        })
+                        .findFirst();
+
                 DynamicCommand dynamicCommand = new DynamicCommand(
-                        annotation.name(),
+                        commandAnnotation.name(),
                         object,
                         declaredMethod,
-                        annotation.description(),
-                        annotation.alias(),
-                        annotation.permission(),
-                        annotation.usage()
+                        commandAnnotation.description(),
+                        commandAnnotation.alias(),
+                        commandAnnotation.permission(),
+                        commandAnnotation.usage(),
+                        tabCompleteMethod.orElse(null)
                 );
-                tempCommands.put(annotation.name(), dynamicCommand);
-            }
-        }
 
-        // Step 2: 设置Tab补全方法
-        for (Method declaredMethod : object.getClass().getDeclaredMethods()) {
-            if (declaredMethod.isAnnotationPresent(TabComplate.class)) {
-                // 存在注解
-                MessageUtils.consoleMessage("存在补全注解");
-                TabComplate tabCompleteAnnotation = declaredMethod.getAnnotation(TabComplate.class);
-                DynamicCommand dynamicCommand = tempCommands.get(tabCompleteAnnotation.command());
-                if (dynamicCommand != null) {
-                    dynamicCommand.setTabComplateMethod(declaredMethod);
+                // 注册指令
+                Objects.requireNonNull(getCommandMap()).register(plugin.getName(), dynamicCommand);
+                if (tabCompleteMethod.isPresent()) {
+                    MessageUtils.consoleMessage("&d[MangoCore] &7动态注册指令: &a" + commandAnnotation.name() + " &7| &a" + "存在补全");
                 } else {
-                    MessageUtils.consoleMessage("&c找不到与TabComplate注解匹配的命令: " + tabCompleteAnnotation.command());
+                    MessageUtils.consoleMessage("&d[MangoCore] &7动态注册指令: &a" + commandAnnotation.name());
                 }
-            }
-        }
 
-        // Step 3: 注册命令
-        for (DynamicCommand dynamicCommand : tempCommands.values()) {
-            Objects.requireNonNull(getCommandMap()).register(plugin.getName(), dynamicCommand);
+            }
         }
     }
 

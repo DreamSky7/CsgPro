@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Command {
+public @interface MangoCommand {
 
     /* 指令名称 */
     String name();

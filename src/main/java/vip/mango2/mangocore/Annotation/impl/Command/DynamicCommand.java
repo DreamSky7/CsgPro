@@ -1,10 +1,11 @@
 package vip.mango2.mangocore.Annotation.impl.Command;
 
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import vip.mango2.mangocore.Annotation.TabComplate;
+import org.bukkit.command.TabExecutor;
 import vip.mango2.mangocore.Utils.MessageUtils;
 
 import java.lang.reflect.Method;
@@ -14,23 +15,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-public class DynamicCommand extends Command implements TabCompleter {
+public class DynamicCommand extends Command {
 
     private final Object instance;
 
     private final Method method;
 
-    private Method tabComplateMethod;
+    private Method tabCompleteMethod;
 
-    public DynamicCommand(String name, Object instance, Method method, String description, String[] aliases, String permission, String usage) {
+    public DynamicCommand(String name, Object instance, Method method, String description, String[] aliases, String permission, String usage,Method tabCompleteMethod) {
         super(name, description, usage, Arrays.asList(aliases));
         this.instance = instance;
         this.method = method;
         this.setPermission(permission);
-    }
-
-    public void setTabComplateMethod(Method tabComplateMethod) {
-        this.tabComplateMethod = tabComplateMethod;
+        this.tabCompleteMethod = tabCompleteMethod;
     }
 
     @Override
@@ -38,26 +36,21 @@ public class DynamicCommand extends Command implements TabCompleter {
         try {
             return (boolean) method.invoke(instance, sender, args);
         } catch (Exception e) {
-            MessageUtils.consoleMessage("&c执行指令时出现错误: " + e.getMessage());
             return false;
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        System.out.println("触发补全");
-        if (tabComplateMethod != null) {
+    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
+        if (tabCompleteMethod != null) {
             try {
-                List<String> ceshi =  (List<String>) tabComplateMethod.invoke(instance, sender, args);
-                System.out.println(ceshi);
-                return (List<String>) tabComplateMethod.invoke(instance, sender, args);
+                return (List<String>) tabCompleteMethod.invoke(instance, sender, args);
             } catch (Exception e) {
-                // 你的错误处理代码
-                MessageUtils.consoleMessage("&c代码补全参数异常: " + e.getMessage());
+                MessageUtils.consoleMessage("&c执行TabComplete时出现错误: " + e.getMessage());
+                return null;
             }
         }
-        return null;
+        return super.tabComplete(sender, alias, args);
     }
-
-
 }

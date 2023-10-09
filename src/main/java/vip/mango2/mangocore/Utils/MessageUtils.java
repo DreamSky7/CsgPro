@@ -4,9 +4,12 @@ import lombok.NoArgsConstructor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import vip.mango2.mangocore.MangoCore;
 
 import java.util.ArrayList;
@@ -96,6 +99,8 @@ public class MessageUtils {
         // 判断配置文件是否存在该Key
         if (fileConfiguration.get(key) == null)
             return;
+
+        ItemStack itemStack = new ItemStack(Material.REDSTONE_ORE);
 
         // 兼容多条消息
         List<String> messages = new ArrayList<>();

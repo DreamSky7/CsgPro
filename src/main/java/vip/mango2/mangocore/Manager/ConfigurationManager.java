@@ -1,6 +1,5 @@
 package vip.mango2.mangocore.Manager;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import vip.mango2.mangocore.Utils.MessageUtils;
@@ -22,7 +21,7 @@ public class ConfigurationManager {
 
     private final JavaPlugin plugin;
 
-    public final Map<String, FileConfiguration> configs = new HashMap<>();
+    public final Map<String, YamlConfiguration> configs = new HashMap<>();
 
     public final Map<String, File> configFiles = new HashMap<>();
 
@@ -93,7 +92,7 @@ public class ConfigurationManager {
         }
     }
 
-    public Optional<FileConfiguration> getConfig(String name) {
+    public Optional<YamlConfiguration> getConfig(String name) {
         return Optional.ofNullable(configs.get(name));
     }
 

@@ -26,16 +26,6 @@ public final class MangoCore extends JavaPlugin {
         instance = this;
         // Plugin startup logic
         registerCommand(new CommandTest());
-
-        configManager = new ConfigurationManager(this);
-        configManager.loadConfig("config");
-        configManager.loadConfig("message");
-
-        YamlConfiguration config = getConfig("config");
-        if (config != null) {
-            YamlUtils.saveObjectToConfig(config, "test", "test");
-            saveConfig("config");
-        }
     }
 
     /**

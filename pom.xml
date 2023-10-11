@@ -6,7 +6,7 @@
 
     <groupId>vip.mango2</groupId>
     <artifactId>MangoCore</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>MangoCore</name>

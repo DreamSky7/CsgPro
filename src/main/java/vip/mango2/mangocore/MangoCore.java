@@ -19,7 +19,7 @@ public final class MangoCore extends JavaPlugin {
     @Getter
     private static MangoCore instance;
 
-    public static ConfigurationManager configurationManager;
+    public static ConfigurationManager configManager;
 
     @Override
     public void onEnable() {
@@ -27,53 +27,36 @@ public final class MangoCore extends JavaPlugin {
         // Plugin startup logic
         registerCommand(new CommandTest());
 
-        configurationManager = new ConfigurationManager(this);
-        configurationManager.loadConfig("config");
+        configManager = new ConfigurationManager(this);
+        configManager.loadConfig("config");
+        configManager.loadConfig("message");
 
-        if (configurationManager.getConfig("config").isPresent()) {
-            YamlConfiguration config = configurationManager.getConfig("config").get();
-            // 基本对象测试
-            YamlUtils.saveObjectToConfig(config, new TStudent("张三",14, false), "基本对象测试");
-
-            // 基本List测试
-            YamlUtils.saveObjectToConfig(config, Arrays.asList("测试", 1, true), "基本List测试");
-
-            // 基本List对象
-            List<TStudent> studentList1 = new ArrayList<>();
-            studentList1.add(new TStudent("杨杰", 67, true));
-            studentList1.add(new TStudent("陈晨", 45, false));
-            studentList1.add(new TStudent("张磊", 23, true));
-            YamlUtils.saveObjectToConfig(config, studentList1, "基本List对象");
-
-            // 基本嵌套对象
-            TClass tClass1 = new TClass();
-            tClass1.setGrade(1);
-            tClass1.setName("一班");
-            tClass1.setStudents(studentList1);
-            YamlUtils.saveObjectToConfig(config, tClass1, "嵌套对象");
-
-            // 基本嵌套List
-            List<TStudent> studentList2 = new ArrayList<>();
-            studentList2.add(new TStudent("孟乐", 78, false));
-            studentList2.add(new TStudent("韩梅", 91, true));
-            studentList2.add(new TStudent("陈晨", 12, false));
-
-            TClass tClass2 = new TClass();
-            tClass2.setGrade(1);
-            tClass2.setName("二班");
-            tClass2.setStudents(studentList2);
-
-            List<TClass> tClasses = new ArrayList<>();
-            tClasses.add(tClass1);
-            tClasses.add(tClass2);
-            YamlUtils.saveObjectToConfig(config, tClasses, "List嵌套对象");
-
-            configurationManager.saveConfig("config");
-
-
+        YamlConfiguration config = getConfig("config");
+        if (config != null) {
+            YamlUtils.saveObjectToConfig(config, "test", "test");
+            saveConfig("config");
         }
+    }
 
-        configurationManager.loadConfig("message");
+    /**
+     * 获取配置文件对象
+     * @param config 配置文件名
+     * @return 配置文件对象
+     */
+    public YamlConfiguration getConfig(String config) {
+        if (configManager.getConfig(config).isPresent()) {
+            return configManager.getConfig(config).get();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * 保存配置文件
+     * @param config
+     */
+    public void saveConfig(String config) {
+        configManager.saveConfig(config);
     }
 
     /**

@@ -26,21 +26,21 @@ public class CommandTest {
                     MessageUtils.senderMessage(sender, "&c/yaml get [配置文件] [键值]");
                     return false;
                 }
-                if (!MangoCore.configurationManager.configs.containsKey(args[1])) {
+                if (!MangoCore.configManager.configs.containsKey(args[1])) {
                     MessageUtils.senderMessage(sender, "&c配置文件不存在");
                     return false;
                 }
-                MessageUtils.senderMessage(sender, "&8> &f" + args[2] + ": " + MangoCore.configurationManager.configs.get(args[1]).get(args[2]));
+                MessageUtils.senderMessage(sender, "&8> &f" + args[2] + ": " + MangoCore.configManager.configs.get(args[1]).get(args[2]));
                 break;
             case "load":
                 if (args.length == 2) {
-                    if (MangoCore.configurationManager.configs.containsKey(args[1])) {
+                    if (MangoCore.configManager.configs.containsKey(args[1])) {
                         MessageUtils.senderMessage(sender, "&c配置文件已存在");
                         return false;
                     }
-                    MangoCore.configurationManager.loadConfig(args[1]);
+                    MangoCore.configManager.loadConfig(args[1]);
                 } else if (args.length == 3) {
-                    MangoCore.configurationManager.loadConfigFromURL(args[1], args[2]);
+                    MangoCore.configManager.loadConfigFromURL(args[1], args[2]);
                 } else {
                     MessageUtils.senderMessage(sender, "&c/yaml load [配置文件] <URL>");
                 }
@@ -49,11 +49,11 @@ public class CommandTest {
                 if (args.length != 2) {
                     MessageUtils.senderMessage(sender, "&c/yaml reload [配置文件]");
                 }
-                MangoCore.configurationManager.reloadConfig(args[1]);
+                MangoCore.configManager.reloadConfig(args[1]);
                 MessageUtils.senderMessage(sender, "&a重载配置文件成功");
                 break;
             case "reloadAll":
-                MangoCore.configurationManager.reloadAllConfig();
+                MangoCore.configManager.reloadAllConfig();
                 MessageUtils.senderMessage(sender, "&a重载所有配置文件成功");
                 break;
             default:
@@ -71,7 +71,7 @@ public class CommandTest {
         }
         if (args.length == 2) {
             if ("reload".equals(args[0])) {
-                collection.addAll(MangoCore.configurationManager.configs.keySet());
+                collection.addAll(MangoCore.configManager.configs.keySet());
             }
         }
         return collection;

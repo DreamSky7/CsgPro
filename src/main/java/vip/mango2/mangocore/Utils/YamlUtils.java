@@ -17,37 +17,39 @@ public class YamlUtils {
      * @param obj 对象
      * @param parentPath 父路径
      */
-    public static void saveObjectToConfig(FileConfiguration config, Object obj, String parentPath) {
+    public static void saveObjectToConfig(FileConfiguration config, String parentPath, Object obj) {
+
         if (obj instanceof Map) {
+            // 如果对象为Map类型
             Map<?, ?> map = (Map<?, ?>) obj;
             for (Map.Entry<?, ?> entry : map.entrySet()) {
                 String key = entry.getKey().toString();
                 Object value = entry.getValue();
                 String fullPath = parentPath.isEmpty() ? key : parentPath + "." + key;
-                saveObjectToConfig(config, value, fullPath);
+                saveObjectToConfig(config, fullPath, value);
             }
         } else if (obj instanceof List) {
-            List<?> list = (List<?>) obj;
-            List<Object> newList = new ArrayList<>();
-            for (Object item : list) {
+            // 如果对象为List类型
+            List<?> originalList = (List<?>) obj;
+            List<Object> serializedList = new ArrayList<>();
+            for (Object item : originalList) {
                 if (item instanceof String || isPrimitiveOrWrapper(item.getClass())) {
-                    newList.add(item);
+                    serializedList.add(item);
+                } else if (item instanceof Map) {
+                    // 如果元素为Map类型
+                    serializedList.add(handleMap((Map<?, ?>) item));
                 } else {
-                    Map<String, Object> serializedItem = serializeObject(item);
-                    newList.add(serializedItem);
+                    serializedList.add(serializeObject(item));
                 }
             }
-            config.set(parentPath, newList);
+            config.set(parentPath, serializedList);
         } else if (isPrimitiveOrWrapper(obj.getClass()) || obj instanceof String) {
+            // 如果对象为基本类型或者String类型
             config.set(parentPath, obj);
         } else {
+            // 如果为自定义对象
             Map<String, Object> serializedObj = serializeObject(obj);
-            for (Map.Entry<String, Object> entry : serializedObj.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                String fullPath = parentPath.isEmpty() ? key : parentPath + "." + key;
-                saveObjectToConfig(config, value, fullPath);
-            }
+            config.set(parentPath, serializedObj);
         }
     }
 
@@ -67,19 +69,18 @@ public class YamlUtils {
                             if (item instanceof String || isPrimitiveOrWrapper(item.getClass())) {
                                 serializedList.add(item);
                             } else {
-                                System.out.println(item);
                                 serializedList.add(serializeObject(item));
                             }
                         }
                         serialized.put(field.getName(), serializedList);
                     } else if (value instanceof Map) {
                         // 如果序列化的值为Map类型
-                        Map<?, ?> originalMap = (Map<?, ?>) value;
-                        Map<Object, Object> newMap = new LinkedHashMap<>(originalMap);
-                        serialized.put(field.getName(), newMap);
+                        serialized.put(field.getName(), handleMap((Map<?, ?>) value));
                     } else if (isPrimitiveOrWrapper(value.getClass()) || value instanceof String) {
                         // 如果值为常规对象的处理
                         serialized.put(field.getName(), value);
+                    } else {
+                        serialized.put(field.getName(), serializeObject(value));
                     }
                 }
             } catch (IllegalAccessException e) {
@@ -87,6 +88,20 @@ public class YamlUtils {
             }
         }
         return serialized;
+    }
+
+    private static Map<String, Object> handleMap(Map<?, ?> value) {
+        Map<String, Object> serializedMap = new LinkedHashMap<>();
+        for (Map.Entry<?, ?> entry : value.entrySet()) {
+            String key = entry.getKey().toString();
+            Object itemValue = entry.getValue();
+            if (itemValue instanceof String || isPrimitiveOrWrapper(itemValue.getClass())) {
+                serializedMap.put(key, itemValue);
+            } else {
+                serializedMap.put(key, serializeObject(itemValue));
+            }
+        }
+        return serializedMap;
     }
 
     private static boolean isPrimitiveOrWrapper(Class<?> type) {

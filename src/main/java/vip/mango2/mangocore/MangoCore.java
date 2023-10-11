@@ -29,33 +29,14 @@ public final class MangoCore extends JavaPlugin {
     }
 
     /**
-     * 获取配置文件对象
-     * @param config 配置文件名
-     * @return 配置文件对象
-     */
-    public YamlConfiguration getConfig(String config) {
-        if (configManager.getConfig(config).isPresent()) {
-            return configManager.getConfig(config).get();
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * 保存配置文件
-     * @param config
-     */
-    public void saveConfig(String config) {
-        configManager.saveConfig(config);
-    }
-
-    /**
      * 注册指令
      * @param obj 指令类
      */
     public void registerCommand(Object obj) {
+        configManager = new ConfigurationManager(this);
         CommandRegister registrar = new CommandRegister(this);
         registrar.registerCommand(obj);
+
     }
 
 

@@ -42,7 +42,6 @@ public class ConfigurationManager {
         }
         configs.put(name, YamlConfiguration.loadConfiguration(file));
         configFiles.put(name, file);
-        MessageUtils.consoleMessage("&7成功加载配置文件: &a" + name);
     }
 
     /**
@@ -92,8 +91,12 @@ public class ConfigurationManager {
         }
     }
 
-    public Optional<YamlConfiguration> getConfig(String name) {
-        return Optional.ofNullable(configs.get(name));
+    public YamlConfiguration getConfig(String name) {
+        if (Optional.ofNullable(configs.get(name)).isPresent()) {
+            return configs.get(name);
+        } else {
+            return null;
+        }
     }
 
     /**

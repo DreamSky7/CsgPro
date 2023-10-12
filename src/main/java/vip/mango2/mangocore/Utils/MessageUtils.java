@@ -3,6 +3,7 @@ package vip.mango2.mangocore.Utils;
 import lombok.NoArgsConstructor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -89,18 +90,28 @@ public class MessageUtils {
     }
 
     /**
+     * 发送自定义消息
+     * @param messages 消息列表
+     * @param sender 发送者
+     * @param params 参数
+     * @param isExpand 是否解析变量
+     */
+    public static void senderMessageByList(List<String> messages, CommandSender sender, Map<String, Object> params, boolean isExpand) {
+        // 循环列表消息并解析对应的变量
+        formatterMessageParams(sender, params, isExpand, messages);
+    }
+
+    /**
      * 发送ActionBar消息
      * @param fileConfiguration 配置文件
      * @param key 配置文件中的key
      * @param sender 发送者
      */
-    public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, Map<String, Object> params) {
+    public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, Map<String, Object> params, boolean isExpand) {
 
         // 判断配置文件是否存在该Key
         if (fileConfiguration.get(key) == null)
             return;
-
-        ItemStack itemStack = new ItemStack(Material.REDSTONE_ORE);
 
         // 兼容多条消息
         List<String> messages = new ArrayList<>();
@@ -113,27 +124,72 @@ public class MessageUtils {
             messages.add(fileConfiguration.getString(key));
         }
 
-        // 获取配置文件是否存在prefix的Key表示消息前缀
-        String prefix = fileConfiguration.getString("prefix") == null
-                ? "&bMangoFightPack &7>>"
-                : fileConfiguration.getString("prefix");
-
         // 循环列表消息并解析对应的变量
+        formatterMessageParams(sender, params, isExpand, messages);
+
+    }
+
+    private static void formatterMessageParams(CommandSender sender, Map<String, Object> params, boolean isExpand, List<String> messages) {
         for (String message : messages) {
-            String msg = message;
 
             // 正则表达式匹配需要的变量
             Pattern pattern = Pattern.compile("%(.*?)%");
             Matcher matcher = pattern.matcher(message);
 
+            List<String> expandedMessages = new ArrayList<>();
+            expandedMessages.add(message);
+
+            // 过滤变量并替换
             while (matcher.find()) {
                 String variable  = matcher.group(1).replace("%", "");
                 if (params.containsKey(variable)) {
-                    msg = msg.replace("%" + variable + "%", Objects.requireNonNull(params.get(variable)).toString());
+
+                    Object value = params.get(variable);
+                    if (value instanceof List) {
+                        List<?> valueList = (List<?>) value;
+                        List<String> newExpandedMessages = new ArrayList<>();
+                        for (String expandedMsg : expandedMessages) {
+                            for (Object item : valueList) {
+                                newExpandedMessages.add(expandedMsg.replace("%" + variable + "%", item.toString()));
+                            }
+                        }
+                        expandedMessages = newExpandedMessages;
+                    } else {
+                        for (int i = 0; i < expandedMessages.size(); i++) {
+                            expandedMessages.set(i, expandedMessages.get(i).replace("%" + variable + "%", value.toString()));
+                        }
+                    }
+
                 }
             }
 
-            senderMessage(sender, msg);
+            for (String expandedMessage : expandedMessages) {
+                if (sender instanceof Player && isExpand) {
+                    Player player = (Player) sender;
+                    if (expandedMessage.startsWith("[title]")) { // 发送Title消息
+                        String[] splitTitle = expandedMessage.replace("[title]", "").split(";");
+                        if (splitTitle.length == 2) {
+                            titleMessage(player, splitTitle[0], splitTitle[1]);
+                        } else if (splitTitle.length == 5) {
+                            titleMessage(player, splitTitle[0], splitTitle[1],
+                                    Integer.parseInt(splitTitle[2]), Integer.parseInt(splitTitle[3]), Integer.parseInt(splitTitle[4]));
+                        } else {
+                            senderMessage(sender, "&cTitle消息格式错误");
+                        }
+                    } else if (expandedMessage.startsWith("[actionbar]")) { // 发送ActionBar消息
+                        actionBarMessage(player, expandedMessage.replace("[actionbar]", ""));
+                    } else if (expandedMessage.startsWith("[command]")) { // 执行指令
+                        player.setOp(true);
+                        Bukkit.dispatchCommand(player, expandedMessage.replace("[command]", ""));
+                        player.setOp(false);
+                    } else if (expandedMessage.startsWith("[console]")) { // 控制台
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), expandedMessage.replace("[command]", ""));
+                    }
+                } else {
+                    senderMessage(sender, expandedMessage);
+                }
+
+            }
         }
     }
 }

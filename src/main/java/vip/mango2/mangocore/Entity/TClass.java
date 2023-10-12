@@ -15,5 +15,5 @@ public class TClass {
 
     private int grade;
 
-    private List<TStudent> students;
+    private TStudent students;
 }

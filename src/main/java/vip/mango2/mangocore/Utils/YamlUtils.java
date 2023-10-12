@@ -225,8 +225,15 @@ public class YamlUtils {
                                 }
                             }
                             field.set(obj, newList);
-                        } else {
+                        }else if (isPrimitiveOrWrapper(value.getClass()) || value instanceof String) {
+                            // 如果值为常规对象的处理
                             field.set(obj, value);
+                        } else {
+                            // 如果值为自定义对象的处理
+                            // 获取当前节点的Map<>
+                            MemorySection memorySection = (MemorySection) value;
+                            Map<String, Object> values = memorySection.getValues(false);
+                            field.set(obj, loadObjectFromMap(values, field.getType()));
                         }
                     }
                 }

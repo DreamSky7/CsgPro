@@ -26,6 +26,10 @@ public final class MangoCore extends JavaPlugin {
         instance = this;
         // Plugin startup logic
         registerCommand(new CommandTest());
+
+        configManager.loadConfig("config");
+
+        Map<String, TClass> classMap = YamlUtils.loadMapFromConfig(configManager.getConfig("config"), "Map嵌套对象", TClass.class);
     }
 
     /**

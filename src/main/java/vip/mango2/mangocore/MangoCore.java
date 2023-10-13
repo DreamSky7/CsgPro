@@ -36,9 +36,9 @@ public final class MangoCore extends JavaPlugin {
      * 注册指令
      * @param obj 指令类
      */
-    public void registerCommand(Object obj) {
-        configManager = new ConfigurationManager(this);
-        CommandRegister registrar = new CommandRegister(this);
+    public static void registerCommand(Object obj) {
+        configManager = new ConfigurationManager(instance);
+        CommandRegister registrar = new CommandRegister(instance);
         registrar.registerCommand(obj);
 
     }

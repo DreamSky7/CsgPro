@@ -2,6 +2,7 @@ package vip.mango2.mangocore.Utils;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.plugin.Plugin;
 import vip.mango2.mangocore.Entity.DataBaseConfig;
 import vip.mango2.mangocore.MangoCore;
 
@@ -20,10 +21,11 @@ public class DataBaseUtils {
 
     private static DruidDataSource druidDataSource;
 
-    private MangoCore plugin;
+    private Plugin plugin;
 
-    public DataBaseUtils(MangoCore plugin, DataBaseConfig dataBaseConfig) {
+    public DataBaseUtils(Plugin plugin, DataBaseConfig dataBaseConfig) {
         try {
+            plugin = this.plugin;
             druidDataSource = new DruidDataSource();
             druidDataSource.setDriverClassName("com.mysql.jdbc.Driver");
             // 链接池相关参数
@@ -46,7 +48,7 @@ public class DataBaseUtils {
         }
     }
 
-    public static Connection getConnection () throws SQLException {
+    public Connection getConnection () throws SQLException {
         return druidDataSource.getConnection();
     }
 
@@ -56,7 +58,7 @@ public class DataBaseUtils {
      * @param preparedStatement 预编译
      * @param resultSet 结果集
      */
-    public static void close(Connection connection, PreparedStatement preparedStatement, ResultSet resultSet) {
+    public void close(Connection connection, PreparedStatement preparedStatement, ResultSet resultSet) {
         if (resultSet != null) {
             try {
                 resultSet.close();
@@ -87,7 +89,7 @@ public class DataBaseUtils {
      * @return 返回删除的行数
      * @throws Exception 异常
      */
-    public static int delete(String tableName, String condition) throws Exception{
+    public int delete(String tableName, String condition) throws Exception{
         int rows = 0;
         StringBuilder sql = new StringBuilder();
         sql.append("DELETE FROM ");
@@ -115,7 +117,7 @@ public class DataBaseUtils {
      * @param <T> 泛型
      * @throws Exception 异常
      */
-    public static <T> int update(String tableName, List<String> column, T obj, String condition) throws Exception{
+    public <T> int update(String tableName, List<String> column, T obj, String condition) throws Exception{
         int rows = 0;
         StringBuilder sql = new StringBuilder();
         sql.append("UPDATE ");
@@ -173,7 +175,7 @@ public class DataBaseUtils {
      * @param obj 数据对象
      * @return 返回插入的行数
      */
-    public static <T> int insert(String tableName,List<String> column, T obj) throws Exception{
+    public <T> int insert(String tableName,List<String> column, T obj) throws Exception{
         int rows = 0;
         StringBuilder sql = new StringBuilder();
         sql.append("INSERT INTO ");
@@ -225,7 +227,7 @@ public class DataBaseUtils {
      * @param condition 条件
      * @return 返回查询的数量
      */
-    public static int selectCount(String tableName, String condition) {
+    public int selectCount(String tableName, String condition) {
         int result = 0;
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
@@ -255,7 +257,7 @@ public class DataBaseUtils {
      * @param condition 附加查询条件（需原生SQL）
      * @param tClass 数据对象
      */
-    public static <T> List<T> select(String tableName, String column,String condition,Class<T> tClass) throws Exception{
+    public <T> List<T> select(String tableName, String column,String condition,Class<T> tClass) throws Exception{
 
         List<T> t = new ArrayList<>();
         StringBuilder sql = new StringBuilder();
@@ -305,7 +307,7 @@ public class DataBaseUtils {
      * @param resultSet 结果集
      * @return 返回是否存在
      */
-    public static boolean isExistColumn(String name, ResultSet resultSet) {
+    public boolean isExistColumn(String name, ResultSet resultSet) {
         try {
             resultSet.findColumn(name);
         } catch (SQLException e) {

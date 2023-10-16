@@ -106,7 +106,9 @@ public class ConfigurationManager {
     public void saveConfig(String name) {
         if (configFiles.containsKey(name) && configs.containsKey(name)) {
             try {
-                configs.get(name).save(configFiles.get(name));
+                YamlConfiguration yamlConfiguration = configs.get(name);
+                yamlConfiguration.save(configFiles.get(name));
+                configs.put(name, YamlConfiguration.loadConfiguration(configFiles.get(name)));
             } catch (IOException e) {
                 MessageUtils.senderMessage(plugin.getServer().getConsoleSender(), "&c保存配置文件时出现错误: " + e.getMessage());
             }

@@ -163,6 +163,7 @@ public class MessageUtils {
                 }
             }
 
+
             for (String expandedMessage : expandedMessages) {
                 if (sender instanceof Player && isExpand) {
                     Player player = (Player) sender;
@@ -184,6 +185,8 @@ public class MessageUtils {
                         player.setOp(false);
                     } else if (expandedMessage.startsWith("[console]")) { // 控制台
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), expandedMessage.replace("[command]", ""));
+                    } else {
+                        senderMessage(sender, expandedMessage);
                     }
                 } else {
                     senderMessage(sender, expandedMessage);

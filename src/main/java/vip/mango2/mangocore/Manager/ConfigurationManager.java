@@ -44,6 +44,22 @@ public class ConfigurationManager {
         configFiles.put(name, file);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public void loadConfig(String name, String path) {
+        String fileName = name + ".yml";
+        File file = new File(plugin.getDataFolder() + path, fileName);
+        if (!file.exists()) {
+            try {
+                file.getParentFile().mkdir();
+                file.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        configs.put(name, YamlConfiguration.loadConfiguration(file));
+        configFiles.put(name, file);
+    }
+
     /**
      * 从URL中加载配置文件
      * @param name 配置文件名
@@ -98,6 +114,7 @@ public class ConfigurationManager {
             return null;
         }
     }
+
 
     /**
      * 保存配置文件

@@ -43,6 +43,18 @@ public final class MangoCore extends JavaPlugin {
 
     }
 
+    public static YamlConfiguration getConfig(String name) {
+        return configManager.getConfig(name);
+    }
+
+    public static void saveConfig(String name) {
+        configManager.saveConfig(name);
+    }
+
+    public static void loadConfig(String name) {
+        configManager.loadConfig(name);
+    }
+
 
     @Override
     public void onDisable() {

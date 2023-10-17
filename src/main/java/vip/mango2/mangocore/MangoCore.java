@@ -1,18 +1,10 @@
 package vip.mango2.mangocore;
 
 import lombok.Getter;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.yaml.snakeyaml.Yaml;
 import vip.mango2.mangocore.Annotation.impl.Command.CommandRegister;
-import vip.mango2.mangocore.Entity.TClass;
-import vip.mango2.mangocore.Entity.TStudent;
 import vip.mango2.mangocore.Manager.ConfigurationManager;
 import vip.mango2.mangocore.Test.CommandTest;
-import vip.mango2.mangocore.Utils.YamlUtils;
-
-import java.util.*;
 
 public final class MangoCore extends JavaPlugin {
 
@@ -28,8 +20,6 @@ public final class MangoCore extends JavaPlugin {
         registerCommand(new CommandTest());
 
         configManager.loadConfig("config");
-
-        Map<String, TClass> classMap = YamlUtils.loadMapFromConfig(configManager.getConfig("config"), "Map嵌套对象", TClass.class);
     }
 
     /**
@@ -41,18 +31,6 @@ public final class MangoCore extends JavaPlugin {
         CommandRegister registrar = new CommandRegister(instance);
         registrar.registerCommand(obj);
 
-    }
-
-    public static YamlConfiguration getConfig(String name) {
-        return configManager.getConfig(name);
-    }
-
-    public static void saveConfig(String name) {
-        configManager.saveConfig(name);
-    }
-
-    public static void loadConfig(String name) {
-        configManager.loadConfig(name);
     }
 
 

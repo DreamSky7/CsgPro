@@ -50,9 +50,9 @@ public class CommandRegister {
                 // 注册指令
                 Objects.requireNonNull(getCommandMap()).register(plugin.getName(), dynamicCommand);
                 if (tabCompleteMethod.isPresent()) {
-                    MessageUtils.consoleMessage("&d[MangoCore] &7动态注册指令: &a" + commandAnnotation.name() + " &7| &a" + "存在补全");
+                    MessageUtils.consoleMessage("&dMango &f| &dCore &7Dynamic Command Registration: &a" + commandAnnotation.name() + " &7| &a" + "存在补全");
                 } else {
-                    MessageUtils.consoleMessage("&d[MangoCore] &7动态注册指令: &a" + commandAnnotation.name());
+                    MessageUtils.consoleMessage("&dMango &f| &dCore &7Dynamic Command Registration: &a" + commandAnnotation.name());
                 }
 
             }
@@ -65,7 +65,7 @@ public class CommandRegister {
             commandMapField.setAccessible(true);
             return (CommandMap) commandMapField.get(Bukkit.getServer());
         } catch (Exception e) {
-            MessageUtils.consoleMessage("&c无法获取CommandMap");
+            MessageUtils.consoleMessage("&cUnable to get CommandMap");
             return null;
         }
     }

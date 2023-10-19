@@ -140,32 +140,32 @@ public class MessageUtils {
             expandedMessages.add(message);
 
             // 过滤变量并替换
-            while (matcher.find()) {
-                String variable  = matcher.group(1).replace("%", "");
-                if (params.containsKey(variable)) {
-
-                    Object value = params.get(variable);
-                    if (value instanceof List) {
-                        List<?> valueList = (List<?>) value;
-                        List<String> newExpandedMessages = new ArrayList<>();
-                        for (String expandedMsg : expandedMessages) {
-                            for (Object item : valueList) {
-                                newExpandedMessages.add(expandedMsg.replace("%" + variable + "%", item.toString()));
+            if (params != null) {
+                while (matcher.find()) {
+                    String variable  = matcher.group(1).replace("%", "");
+                    if (params.containsKey(variable)) {
+                        Object value = params.get(variable);
+                        if (value instanceof List) {
+                            List<?> valueList = (List<?>) value;
+                            List<String> newExpandedMessages = new ArrayList<>();
+                            for (String expandedMsg : expandedMessages) {
+                                for (Object item : valueList) {
+                                    newExpandedMessages.add(expandedMsg.replace("%" + variable + "%", item.toString()));
+                                }
+                            }
+                            expandedMessages = newExpandedMessages;
+                        } else {
+                            for (int i = 0; i < expandedMessages.size(); i++) {
+                                expandedMessages.set(i, expandedMessages.get(i).replace("%" + variable + "%", value.toString()));
                             }
                         }
-                        expandedMessages = newExpandedMessages;
-                    } else {
-                        for (int i = 0; i < expandedMessages.size(); i++) {
-                            expandedMessages.set(i, expandedMessages.get(i).replace("%" + variable + "%", value.toString()));
-                        }
                     }
-
                 }
             }
 
 
             for (String expandedMessage : expandedMessages) {
-                if (sender instanceof Player && isExpand) {
+                if (sender instanceof Player) {
                     Player player = (Player) sender;
                     if (expandedMessage.startsWith("[title]")) { // 发送Title消息
                         String[] splitTitle = expandedMessage.replace("[title]", "").split(";");
@@ -177,21 +177,24 @@ public class MessageUtils {
                         } else {
                             senderMessage(sender, "&cTitle消息格式错误");
                         }
+                        return;
                     } else if (expandedMessage.startsWith("[actionbar]")) { // 发送ActionBar消息
                         actionBarMessage(player, expandedMessage.replace("[actionbar]", ""));
-                    } else if (expandedMessage.startsWith("[command]")) { // 执行指令
-                        player.setOp(true);
-                        Bukkit.dispatchCommand(player, expandedMessage.replace("[command]", ""));
-                        player.setOp(false);
-                    } else if (expandedMessage.startsWith("[console]")) { // 控制台
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), expandedMessage.replace("[command]", ""));
-                    } else {
-                        senderMessage(sender, expandedMessage);
+                        return;
                     }
-                } else {
-                    senderMessage(sender, expandedMessage);
+                    if (isExpand) {
+                        if (expandedMessage.startsWith("[command]")) { // 执行指令
+                            player.setOp(true);
+                            Bukkit.dispatchCommand(player, expandedMessage.replace("[command]", ""));
+                            player.setOp(false);
+                            return;
+                        } else if (expandedMessage.startsWith("[console]")) { // 控制台
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), expandedMessage.replace("[command]", ""));
+                            return;
+                        }
+                    }
                 }
-
+                senderMessage(sender, expandedMessage);
             }
         }
     }

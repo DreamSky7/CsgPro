@@ -1,6 +1,7 @@
 package vip.mango2.mangocore.Utils;
 
 import lombok.NoArgsConstructor;
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -31,28 +32,78 @@ public class MessageUtils {
      * @param message 消息
      */
     public static void consoleMessage(String message) {
-        MangoCore.getInstance()
-                .getServer().getConsoleSender()
-                .sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+        senderMessage(Bukkit.getConsoleSender(), message);
+    }
+
+    public static void senderMessage(CommandSender sender, String message) {
+        senderMessage(sender, message, false, false);
+    }
+
+    public static void senderMessage(CommandSender sender, String message, boolean usePlaceholder) {
+        senderMessage(sender, message, usePlaceholder, false);
     }
 
     /**
      * 由命令发送者发送消息
-     * @param sender
-     * @param message
+     * @param sender 发送者
+     * @param message 消息
+     * @param isExpand 是否解析扩展
+     * @param usePlaceholder 是否使用占位符
      */
-    public static void senderMessage(CommandSender sender, String message) {
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+    public static void senderMessage(CommandSender sender, String message, boolean usePlaceholder, boolean isExpand) {
+
+        message = ChatColor.translateAlternateColorCodes('&', message);
+
+        Player senderPlayer = null;
+        if (sender instanceof Player) {
+            senderPlayer = (Player) sender;
+            if (usePlaceholder) {
+                message = PlaceholderAPI.setPlaceholders((Player) sender, message);
+            }
+        }
+
+        if (isExpand) {
+            String customValid = ValidUtils.getCustomValid("\\[.*?\\].*", message);
+            if (customValid != null && senderPlayer != null) {
+                    switch (customValid) {
+                        case "[title]":
+                            handleTitleMessage(senderPlayer, message);
+                            return;
+                        case "[actionbar]":
+                            actionBarMessage(senderPlayer, message.replace("[actionbar]", ""));
+                            return;
+                        case "[command]":
+                            senderPlayer.setOp(true);
+                            Bukkit.dispatchCommand(senderPlayer, message.replace("[command]", ""));
+                            senderPlayer.setOp(false);
+                            return;
+                        case "[console]":
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), message.replace("[console]", ""));
+                            return;
+                    }
+            }
+            senderMessage(sender, message, false, false);
+        }
     }
 
     /**
-     * 发送玩家消息
+     * 发送标题消息
      * @param player 玩家
      * @param message 消息
      */
-    public static void playerMessage(Player player, String message) {
-        player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+    private static void handleTitleMessage(Player player, String message) {
+        String[] splitTitle = message.replace("[title]", "").split(";");
+
+        if (splitTitle.length == 2) {
+            titleMessage(player, splitTitle[0], splitTitle[1]);
+        } else if (splitTitle.length == 5) {
+            titleMessage(player, splitTitle[0], splitTitle[1],
+                    Integer.parseInt(splitTitle[2]), Integer.parseInt(splitTitle[3]), Integer.parseInt(splitTitle[4]));
+        } else {
+            senderMessage(player, "&cTitle消息格式错误", false, false);
+        }
     }
+
 
     /**
      * 发送Title消息
@@ -75,8 +126,7 @@ public class MessageUtils {
      * @param subTitle 副标题
      */
     public static void titleMessage(Player player, String title, String subTitle) {
-        player.sendTitle(ChatColor.translateAlternateColorCodes('&', title),
-                ChatColor.translateAlternateColorCodes('&', subTitle), 10, 70, 20);
+        titleMessage(player, title, subTitle, 10, 70, 20);
     }
 
     /**

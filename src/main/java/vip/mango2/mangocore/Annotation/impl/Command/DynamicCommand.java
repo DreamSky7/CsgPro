@@ -37,6 +37,8 @@ public class DynamicCommand extends Command {
         try {
             return (boolean) method.invoke(instance, sender, args);
         } catch (Exception e) {
+            e.printStackTrace();
+            MessageUtils.consoleMessage("执行指令出现了异常");
             return false;
         }
     }

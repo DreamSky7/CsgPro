@@ -15,10 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import vip.mango2.mangocore.MangoCore;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,12 +33,23 @@ public class MessageUtils {
         senderMessage(Bukkit.getConsoleSender(), message);
     }
 
+    /**
+     * 由命令发送者发送消息
+     * @param sender 发送者
+     * @param message 消息
+     */
     public static void senderMessage(CommandSender sender, String message) {
-        senderMessage(sender, message, false, false);
+        senderMessage(sender, message, false, false, null);
     }
 
-    public static void senderMessage(CommandSender sender, String message, boolean usePlaceholder) {
-        senderMessage(sender, message, usePlaceholder, false);
+    /**
+     * 由命令发送者发送消息
+     * @param sender 发送者
+     * @param message 消息
+     * @param isExpand 是否解析扩展
+     */
+    public static void senderMessage(CommandSender sender, String message, boolean isExpand) {
+        senderMessage(sender, message, isExpand, false, null);
     }
 
     /**
@@ -51,40 +59,53 @@ public class MessageUtils {
      * @param isExpand 是否解析扩展
      * @param usePlaceholder 是否使用占位符
      */
-    public static void senderMessage(CommandSender sender, String message, boolean usePlaceholder, boolean isExpand) {
+    public static void senderMessage(CommandSender sender, String message, boolean isExpand, boolean usePlaceholder) {
+        senderMessage(sender, message, isExpand, usePlaceholder, null);
+    }
 
+    /**
+     * 由命令发送者发送消息
+     * @param sender 发送者
+     * @param message 消息
+     * @param isExpand 是否解析扩展
+     * @param usePlaceholder 是否使用占位符
+     */
+    public static void senderMessage(CommandSender sender, String message, boolean isExpand, boolean usePlaceholder, Map<String, Object> params) {
+
+        // 颜色代码
         message = ChatColor.translateAlternateColorCodes('&', message);
 
-        Player senderPlayer = null;
-        if (sender instanceof Player) {
-            senderPlayer = (Player) sender;
-            if (usePlaceholder) {
-                message = PlaceholderAPI.setPlaceholders((Player) sender, message);
+        // PAPI变量
+        if (usePlaceholder && sender instanceof Player) {
+            message = PlaceholderAPI.setPlaceholders((Player) sender, message);
+        }
+
+        // 自定义变量
+        if (params != null) {
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                message = message.replace("%" + key + "%", String.valueOf(value));
             }
         }
 
         if (isExpand) {
-            String customValid = ValidUtils.getCustomValid("\\[.*?\\].*", message);
-            if (customValid != null && senderPlayer != null) {
-                    switch (customValid) {
-                        case "[title]":
-                            handleTitleMessage(senderPlayer, message);
-                            return;
-                        case "[actionbar]":
-                            actionBarMessage(senderPlayer, message.replace("[actionbar]", ""));
-                            return;
-                        case "[command]":
-                            senderPlayer.setOp(true);
-                            Bukkit.dispatchCommand(senderPlayer, message.replace("[command]", ""));
-                            senderPlayer.setOp(false);
-                            return;
-                        case "[console]":
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), message.replace("[console]", ""));
-                            return;
-                    }
+            if (message.startsWith("[title]")) {
+                handleTitleMessage((Player) sender, message);
+                return;
+            } else if (message.startsWith("[actionbar]")) {
+                actionBarMessage((Player) sender, message.replace("[actionbar]", ""));
+                return;
+            } else if (message.startsWith("[command]")) {
+                executeCommand((Player) sender, message.replace("[command]", ""));
+                return;
+            } else if (message.startsWith("[console]")) {
+                executeConsoleCommand(message.replace("[console]", ""));
+                return;
             }
-            senderMessage(sender, message, false, false);
         }
+
+        sender.sendMessage(message);
     }
 
     /**
@@ -94,7 +115,7 @@ public class MessageUtils {
      * @param sender 发送者
      */
     public static void senderMessageByConfig(FileConfiguration fileConfiguration, CommandSender sender, String key) {
-        senderMessageByConfig(fileConfiguration, key, sender, false, false);
+        senderMessageByConfig(fileConfiguration, key, sender, false, false, null);
     }
 
     /**
@@ -104,8 +125,20 @@ public class MessageUtils {
      * @param sender 发送者
      * @param usePlaceholder 是否解析使用占位符
      */
-    public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, boolean usePlaceholder) {
-        senderMessageByConfig(fileConfiguration, key, sender, usePlaceholder, false);
+    public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, boolean isExpand) {
+        senderMessageByConfig(fileConfiguration, key, sender, isExpand, false, null);
+    }
+
+    /**
+     * 发送消息
+     * @param fileConfiguration 配置文件
+     * @param key 配置文件中的key
+     * @param sender 发送者
+     * @param usePlaceholder 是否解析使用占位符
+     * @param isExpand 是否解析扩展
+     */
+    public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, boolean isExpand, boolean usePlaceholder) {
+        senderMessageByConfig(fileConfiguration, key, sender, usePlaceholder, isExpand, null);
     }
 
     /**
@@ -116,7 +149,7 @@ public class MessageUtils {
      * @param usePlaceholder 是否解析使用占位符
      * @param isExpand 是否解析扩展
      */
-    public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, boolean usePlaceholder, boolean isExpand) {
+    public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, boolean isExpand, boolean usePlaceholder, Map<String, Object> params) {
 
         if (fileConfiguration.get(key) == null)
             return;
@@ -129,8 +162,18 @@ public class MessageUtils {
         }
 
         for (String message : messages) {
-            senderMessage(sender, message, usePlaceholder, isExpand);
+            senderMessage(sender, message, isExpand, usePlaceholder, null);
         }
+    }
+
+    private static void executeCommand(Player player, String command) {
+        player.setOp(true);
+        Bukkit.dispatchCommand(player, command);
+        player.setOp(false);
+    }
+
+    private static void executeConsoleCommand(String command) {
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
     }
 
     /**
@@ -184,75 +227,4 @@ public class MessageUtils {
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR,
                 new TextComponent(ChatColor.translateAlternateColorCodes('&', message)));
     }
-
-    private static void formatterMessageParams(CommandSender sender, Map<String, Object> params, boolean isExpand, List<String> messages) {
-        for (String message : messages) {
-
-            // 正则表达式匹配需要的变量
-            Pattern pattern = Pattern.compile("%(.*?)%");
-            Matcher matcher = pattern.matcher(message);
-
-            List<String> expandedMessages = new ArrayList<>();
-            expandedMessages.add(message);
-
-            // 过滤变量并替换
-            if (params != null) {
-                while (matcher.find()) {
-                    String variable  = matcher.group(1).replace("%", "");
-                    if (params.containsKey(variable)) {
-                        Object value = params.get(variable);
-                        if (value instanceof List) {
-                            List<?> valueList = (List<?>) value;
-                            List<String> newExpandedMessages = new ArrayList<>();
-                            for (String expandedMsg : expandedMessages) {
-                                for (Object item : valueList) {
-                                    newExpandedMessages.add(expandedMsg.replace("%" + variable + "%", item.toString()));
-                                }
-                            }
-                            expandedMessages = newExpandedMessages;
-                        } else {
-                            for (int i = 0; i < expandedMessages.size(); i++) {
-                                expandedMessages.set(i, expandedMessages.get(i).replace("%" + variable + "%", value.toString()));
-                            }
-                        }
-                    }
-                }
-            }
-
-
-            for (String expandedMessage : expandedMessages) {
-                if (sender instanceof Player) {
-                    Player player = (Player) sender;
-                    if (expandedMessage.startsWith("[title]")) { // 发送Title消息
-                        String[] splitTitle = expandedMessage.replace("[title]", "").split(";");
-                        if (splitTitle.length == 2) {
-                            titleMessage(player, splitTitle[0], splitTitle[1]);
-                        } else if (splitTitle.length == 5) {
-                            titleMessage(player, splitTitle[0], splitTitle[1],
-                                    Integer.parseInt(splitTitle[2]), Integer.parseInt(splitTitle[3]), Integer.parseInt(splitTitle[4]));
-                        } else {
-                            senderMessage(sender, "&cTitle消息格式错误");
-                        }
-                        return;
-                    } else if (expandedMessage.startsWith("[actionbar]")) { // 发送ActionBar消息
-                        actionBarMessage(player, expandedMessage.replace("[actionbar]", ""));
-                        return;
-                    }
-                    if (isExpand) {
-                        if (expandedMessage.startsWith("[command]")) { // 执行指令
-                            player.setOp(true);
-                            Bukkit.dispatchCommand(player, expandedMessage.replace("[command]", ""));
-                            player.setOp(false);
-                            return;
-                        } else if (expandedMessage.startsWith("[console]")) { // 控制台
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), expandedMessage.replace("[command]", ""));
-                            return;
-                        }
-                    }
-                }
-                senderMessage(sender, expandedMessage);
-            }
-        }
-    }
-
 }

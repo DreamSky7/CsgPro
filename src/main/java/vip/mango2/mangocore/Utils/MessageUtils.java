@@ -123,7 +123,7 @@ public class MessageUtils {
      * @param fileConfiguration 配置文件
      * @param key 配置文件中的key
      * @param sender 发送者
-     * @param usePlaceholder 是否解析使用占位符
+     * @param isExpand 是否解析使用占位符
      */
     public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, boolean isExpand) {
         senderMessageByConfig(fileConfiguration, key, sender, isExpand, false, null);
@@ -166,16 +166,6 @@ public class MessageUtils {
         }
     }
 
-    private static void executeCommand(Player player, String command) {
-        player.setOp(true);
-        Bukkit.dispatchCommand(player, command);
-        player.setOp(false);
-    }
-
-    private static void executeConsoleCommand(String command) {
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-    }
-
     /**
      * 发送Title消息（默认时间）
      * @param player 玩家
@@ -209,12 +199,18 @@ public class MessageUtils {
         String[] splitTitle = message.replace("[title]", "").split(";");
 
         if (splitTitle.length == 2) {
-            titleMessage(player, splitTitle[0], splitTitle[1]);
+            player.sendTitle(splitTitle[0], splitTitle[1], 10, 70, 20);
         } else if (splitTitle.length == 5) {
-            titleMessage(player, splitTitle[0], splitTitle[1],
-                    Integer.parseInt(splitTitle[2]), Integer.parseInt(splitTitle[3]), Integer.parseInt(splitTitle[4]));
+            try {
+                int inTime = Integer.parseInt(splitTitle[2]);
+                int duration = Integer.parseInt(splitTitle[3]);
+                int outTime = Integer.parseInt(splitTitle[4]);
+                player.sendTitle(splitTitle[0], splitTitle[1], inTime, duration, outTime);
+            } catch (NumberFormatException e) {
+                player.sendMessage("标题文本格式错误");
+            }
         } else {
-            senderMessage(player, "&cTitle消息格式错误", false, false);
+            player.sendMessage("标题文本格式错误");
         }
     }
 
@@ -226,5 +222,24 @@ public class MessageUtils {
     public static void actionBarMessage(Player player, String message) {
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR,
                 new TextComponent(ChatColor.translateAlternateColorCodes('&', message)));
+    }
+
+    /**
+     * 以玩家身份执行指令
+     * @param player 玩家
+     * @param command 指令
+     */
+    private static void executeCommand(Player player, String command) {
+        player.setOp(true);
+        Bukkit.dispatchCommand(player, command);
+        player.setOp(false);
+    }
+
+    /**
+     * 控制台执行指令
+     * @param command 指令
+     */
+    private static void executeConsoleCommand(String command) {
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
     }
 }

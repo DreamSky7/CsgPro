@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import vip.mango2.mangocore.MangoCore;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +88,76 @@ public class MessageUtils {
     }
 
     /**
+     * 发送Config配置文件中的消息
+     * @param fileConfiguration 配置文件
+     * @param key 配置文件中的key
+     * @param sender 发送者
+     */
+    public static void senderMessageByConfig(FileConfiguration fileConfiguration, CommandSender sender, String key) {
+        senderMessageByConfig(fileConfiguration, key, sender, false, false);
+    }
+
+    /**
+     * 发送消息
+     * @param fileConfiguration 配置文件
+     * @param key 配置文件中的key
+     * @param sender 发送者
+     * @param usePlaceholder 是否解析使用占位符
+     */
+    public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, boolean usePlaceholder) {
+        senderMessageByConfig(fileConfiguration, key, sender, usePlaceholder, false);
+    }
+
+    /**
+     * 发送Config配置文件中的消息
+     * @param fileConfiguration 配置文件
+     * @param key 配置文件中的key
+     * @param sender 发送者
+     * @param usePlaceholder 是否解析使用占位符
+     * @param isExpand 是否解析扩展
+     */
+    public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, boolean usePlaceholder, boolean isExpand) {
+
+        if (fileConfiguration.get(key) == null)
+            return;
+
+        List<String> messages = new ArrayList<>();
+        if (fileConfiguration.get(key) instanceof List) {
+            messages = fileConfiguration.getStringList(key);
+        } else if (fileConfiguration.get(key) instanceof String) {
+            messages.add(fileConfiguration.getString(key));
+        }
+
+        for (String message : messages) {
+            senderMessage(sender, message, usePlaceholder, isExpand);
+        }
+    }
+
+    /**
+     * 发送Title消息（默认时间）
+     * @param player 玩家
+     * @param title 标题
+     * @param subTitle 副标题
+     */
+    public static void titleMessage(Player player, String title, String subTitle) {
+        titleMessage(player, title, subTitle, 10, 70, 20);
+    }
+
+    /**
+     * 发送Title消息
+     * @param player 玩家
+     * @param title 标题
+     * @param subTitle 副标题
+     * @param inTime 淡入时间
+     * @param time 持续时间
+     * @param outTime 淡出时间
+     */
+    public static void titleMessage(Player player, String title, String subTitle, int inTime, int time, int outTime) {
+        player.sendTitle(ChatColor.translateAlternateColorCodes('&', title),
+                ChatColor.translateAlternateColorCodes('&', subTitle), inTime, time, outTime);
+    }
+
+    /**
      * 发送标题消息
      * @param player 玩家
      * @param message 消息
@@ -104,31 +175,6 @@ public class MessageUtils {
         }
     }
 
-
-    /**
-     * 发送Title消息
-     * @param player 玩家
-     * @param title 标题
-     * @param subTitle 副标题
-     * @param inTime 淡入时间
-     * @param time 持续时间
-     * @param outTime 淡出时间
-     */
-    public static void titleMessage(Player player, String title, String subTitle, int inTime, int time, int outTime) {
-        player.sendTitle(ChatColor.translateAlternateColorCodes('&', title),
-                ChatColor.translateAlternateColorCodes('&', subTitle), inTime, time, outTime);
-    }
-
-    /**
-     * 发送Title消息（默认时间）
-     * @param player 玩家
-     * @param title 标题
-     * @param subTitle 副标题
-     */
-    public static void titleMessage(Player player, String title, String subTitle) {
-        titleMessage(player, title, subTitle, 10, 70, 20);
-    }
-
     /**
      * 发送ActionBar消息
      * @param player 玩家
@@ -137,46 +183,6 @@ public class MessageUtils {
     public static void actionBarMessage(Player player, String message) {
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR,
                 new TextComponent(ChatColor.translateAlternateColorCodes('&', message)));
-    }
-
-    /**
-     * 发送自定义消息
-     * @param messages 消息列表
-     * @param sender 发送者
-     * @param params 参数
-     * @param isExpand 是否解析变量
-     */
-    public static void senderMessageByList(List<String> messages, CommandSender sender, Map<String, Object> params, boolean isExpand) {
-        // 循环列表消息并解析对应的变量
-        formatterMessageParams(sender, params, isExpand, messages);
-    }
-
-    /**
-     * 发送ActionBar消息
-     * @param fileConfiguration 配置文件
-     * @param key 配置文件中的key
-     * @param sender 发送者
-     */
-    public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, Map<String, Object> params, boolean isExpand) {
-
-        // 判断配置文件是否存在该Key
-        if (fileConfiguration.get(key) == null)
-            return;
-
-        // 兼容多条消息
-        List<String> messages = new ArrayList<>();
-
-        if (fileConfiguration.get(key) instanceof List) {
-            // 判断是否为List
-            messages = fileConfiguration.getStringList(key);
-        } else if (fileConfiguration.get(key) instanceof String) {
-            // 判断是否为String
-            messages.add(fileConfiguration.getString(key));
-        }
-
-        // 循环列表消息并解析对应的变量
-        formatterMessageParams(sender, params, isExpand, messages);
-
     }
 
     private static void formatterMessageParams(CommandSender sender, Map<String, Object> params, boolean isExpand, List<String> messages) {
@@ -248,4 +254,5 @@ public class MessageUtils {
             }
         }
     }
+
 }

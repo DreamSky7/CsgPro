@@ -5,12 +5,9 @@ import lombok.Getter;
 import java.io.File;
 import java.io.IOException;
 
-public abstract  class MangoFile {
+public abstract class MangoFile {
 
-    protected File file;
-
-    @Getter
-    protected boolean loaded = false;
+    private final File file;
 
     public MangoFile(String filePath) {
         this.file = new File(filePath);
@@ -20,30 +17,27 @@ public abstract  class MangoFile {
         return file.getPath();
     }
 
+    public void load() throws IOException {
+        onLoad(file);
+    }
+
     /**
      * 加载配置文件
      * @throws IOException IO异常
      */
-    public abstract void load() throws IOException;
+    public abstract void onLoad(File file) throws IOException;
+
+
+    public void save() throws IOException {
+        onSave(file);
+    }
 
     /**
      * 保存配置文件
      * @throws IOException IO异常
      */
-    public abstract void save() throws IOException;
+    public abstract void onSave(File file) throws IOException;
 
-    /**
-     * 获取配置项的值
-     * @param path 配置项路径
-     * @return 配置项的值
-     */
-    public abstract Object get(String path);
 
-    /**
-     * 设置配置项的值
-     * @param path 配置项路径
-     * @param value 配置项的值
-     */
-    public abstract void set(String path, Object value);
 
 }

@@ -1,15 +1,13 @@
 package vip.mango2.mangocore.Manager;
 
-import org.bukkit.configuration.file.YamlConfiguration;
+import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.Nullable;
-import vip.mango2.mangocore.Entity.File.MangoFile;
-import vip.mango2.mangocore.Entity.File.MangoYamlFile;
+import vip.mango2.mangocore.Entity.File.MangoConfiguration;
+import vip.mango2.mangocore.Entity.File.Configuration.MangoYamlFile;
 import vip.mango2.mangocore.Enum.FileType;
 import vip.mango2.mangocore.Utils.MessageUtils;
 import vip.mango2.mangocore.Utils.ValidUtils;
 
-import javax.swing.text.html.Option;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -17,15 +15,16 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MangoFileManager {
 
     private final JavaPlugin plugin;
 
-    private Map<String, MangoFile> files = new HashMap<>();
+    @Getter
+    private final Map<String, MangoConfiguration> files = new ConcurrentHashMap<>();
 
     public MangoFileManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -37,7 +36,7 @@ public class MangoFileManager {
      * @param type 配置文件类型
      * @return 配置文件
      */
-    public MangoFile loadFile(String fileName, FileType type) {
+    public MangoConfiguration loadFile(String fileName, FileType type) {
         return loadFile(fileName, type, null);
     }
 
@@ -48,7 +47,7 @@ public class MangoFileManager {
      * @param subDirectory 子目录
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public MangoFile loadFile(String fileName, FileType fileType, String subDirectory) {
+    public MangoConfiguration loadFile(String fileName, FileType fileType, String subDirectory) {
 
         File dataFolder = Optional.ofNullable(subDirectory)
                             .map(sd -> new File(plugin.getDataFolder(), sd))
@@ -58,8 +57,12 @@ public class MangoFileManager {
         }
 
         File file = new File(dataFolder, fileName);
-        return files.computeIfAbsent(file.getPath(), path -> {
-            MangoFile mangoFile = fileType.createFile(path);
+        if (!file.exists()) {
+            // 尝试从插件的资源中复制文件
+            plugin.saveResource(fileName, false);
+        }
+        return files.computeIfAbsent(fileName, path -> {
+            MangoConfiguration mangoFile = fileType.createFile(file.getPath());
             try {
                 mangoFile.load();
             } catch (IOException e) {
@@ -99,7 +102,7 @@ public class MangoFileManager {
             }
 
             // 使用 MangoFileManager 来管理文件
-            MangoFile mangoFile = loadFile(name + ".yml", FileType.YAML);
+            MangoConfiguration mangoFile = loadFile(name + ".yml", FileType.YAML);
             if (mangoFile instanceof MangoYamlFile) {
                 MangoYamlFile yamlFile = (MangoYamlFile) mangoFile;
                 yamlFile.loadFromString(content.toString()); // 加载内容
@@ -123,7 +126,7 @@ public class MangoFileManager {
      * 获取配置文件
      * @param fileName 配置文件名
      */
-    public MangoFile getFile(String fileName) {
+    public MangoConfiguration getFile(String fileName) {
         return files.get(fileName);
     }
 
@@ -132,7 +135,7 @@ public class MangoFileManager {
      * @param fileName
      */
     public void saveFile(String fileName) {
-        MangoFile file = files.get(fileName);
+        MangoConfiguration file = files.get(fileName);
         if (file != null) {
             try {
                 file.save();
@@ -149,7 +152,7 @@ public class MangoFileManager {
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void deleteFile(String fileName) {
-        MangoFile file = files.get(fileName);
+        MangoConfiguration file = files.get(fileName);
         if (file != null) {
             try {
                 File diskFile = new File(file.getFilePath());
@@ -168,7 +171,7 @@ public class MangoFileManager {
      * @param fileName 配置文件名
      */
     public void reloadFile(String fileName) {
-        MangoFile file = files.get(fileName);
+        MangoConfiguration file = files.get(fileName);
         if (file != null) {
             try {
                 file.load();

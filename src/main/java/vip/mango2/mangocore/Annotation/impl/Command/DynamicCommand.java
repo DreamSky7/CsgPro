@@ -9,6 +9,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.command.TabExecutor;
 import vip.mango2.mangocore.Utils.MessageUtils;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;

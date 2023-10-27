@@ -55,6 +55,14 @@ public class CommandRegister {
                     MessageUtils.consoleMessage("&dMango &f| &dCore &7Dynamic Command Registration: &a" + commandAnnotation.name());
                 }
 
+
+                if(10>5) {
+                    // 当 10 > 5 == true 时执行
+                    System.out.println("yes");
+                } else {
+                    // 当 10 > 5 == false 时执行
+                    System.out.println("no");
+                }
             }
         }
     }

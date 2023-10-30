@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 
 public class MangoJsonFile extends MangoConfiguration {
@@ -41,8 +42,24 @@ public class MangoJsonFile extends MangoConfiguration {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T get(String path, T def) {
-        T value = (T) jsonConfig.getObject(path, def.getClass());
-        return value != null ? value : def;
+    public <T> T get(String path, Class<T> def) {
+        if (def == null) {
+            return (T) jsonConfig.get(path);
+        }
+
+        T value = (T) jsonConfig.getObject(path, def);
+        if (value != null) {
+            return value;
+        }
+
+        try {
+            return def.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException("无法创建 " + def.getName() + " 的实例", e);
+        }
+    }
+
+    public String getString(String path) {
+        return jsonConfig.getString(path);
     }
 }

@@ -8,6 +8,7 @@ import vip.mango2.mangocore.Entity.File.MangoFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 public class MangoYamlFile extends MangoConfiguration {
 
@@ -35,15 +36,27 @@ public class MangoYamlFile extends MangoConfiguration {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T get(String path, T def) {
+    public <T> T get(String path, Class<T> defClass) {
         Object value = yamlConfig.get(path);
-        if (def != null && value != null) {
-            if (def.getClass().isAssignableFrom(value.getClass())) {
+        if (value != null) {
+            if (defClass == null || defClass.isInstance(value)) {
                 return (T) value;
+            } else {
+                throw new ClassCastException("无法将配置项 " + path + " 的值 " + value.getClass().getName() + " 转换为 " + defClass.getName());
             }
         }
-        return def;
+
+        if (defClass != null) {
+            try {
+                return defClass.getDeclaredConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new RuntimeException("无法创建 " + defClass.getName() + " 的实例", e);
+            }
+        }
+
+        return null;
     }
+
 
     @Override
     public void set(String path, Object value) {

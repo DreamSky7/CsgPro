@@ -1,5 +1,7 @@
 package vip.mango2.mangocore.Entity.File;
 
+import java.math.BigDecimal;
+
 public abstract class MangoConfiguration extends MangoFile{
     public MangoConfiguration(String filePath) {
         super(filePath);
@@ -17,7 +19,7 @@ public abstract class MangoConfiguration extends MangoFile{
     }
 
 
-    public abstract <T> T get(String path, T def);
+    public abstract <T> T get(String path, Class<T> def);
 
     public int getInt(String path) {
         Integer value = get(path);
@@ -30,8 +32,16 @@ public abstract class MangoConfiguration extends MangoFile{
     }
 
     public double getDouble(String path) {
-        Double value = get(path);
-        return value != null ? value : 0.0;
+        Object value = get(path);
+        if (value instanceof Double) {
+            return ((Double) value).floatValue();
+        } else if (value instanceof Float) {
+            return (Float) value;
+        } else if (value instanceof BigDecimal) {
+            return ((BigDecimal) value).floatValue();
+        } else {
+            return 0F;
+        }
     }
 
     public boolean getBoolean(String path) {
@@ -40,28 +50,38 @@ public abstract class MangoConfiguration extends MangoFile{
     }
 
     public long getLong(String path) {
-        Long value = get(path);
-        return value != null ? value : 0L;
+        Object value = get(path);
+        if (value instanceof Integer) {
+            return ((Integer) value).longValue();
+        } else if (value instanceof Long) {
+            return (Long) value;
+        } else {
+            return 0L;
+        }
     }
 
     public float getFloat(String path) {
-        Float value = get(path);
-        return value != null ? value : 0F;
-    }
-
-    public short getShort(String path) {
-        Short value = get(path);
-        return value != null ? value : 0;
-    }
-
-    public byte getByte(String path) {
-        Byte value = get(path);
-        return value != null ? value : 0;
+        Object value = get(path);
+        if (value instanceof Double) {
+            return ((Double) value).floatValue();
+        } else if (value instanceof Float) {
+            return (Float) value;
+        } else if (value instanceof BigDecimal) {
+            return ((BigDecimal) value).floatValue();
+        } else {
+            return 0F;
+        }
     }
 
     public char getChar(String path) {
-        Character value = get(path);
-        return value != null ? value : 0;
+        Object value = get(path);
+        if (value instanceof String) {
+            String stringValue = (String) value;
+            if (stringValue.length() == 1) {
+                return stringValue.charAt(0);
+            }
+        }
+        return '\u0000';
     }
 
     public boolean contains(String path) {

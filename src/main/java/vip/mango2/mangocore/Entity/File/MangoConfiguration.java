@@ -1,6 +1,9 @@
 package vip.mango2.mangocore.Entity.File;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class MangoConfiguration extends MangoFile{
     public MangoConfiguration(String filePath) {
@@ -14,75 +17,30 @@ public abstract class MangoConfiguration extends MangoFile{
      */
     public abstract void set(String path, Object value);
 
-    public <T> T get(String path) {
-        return get(path, null);
-    }
+    public abstract Object get(String path);
 
 
     public abstract <T> T get(String path, Class<T> def);
 
-    public int getInt(String path) {
-        Integer value = get(path);
-        return value != null ? value : 0;
-    }
+    public abstract int getInt(String path);
 
-    public String getString(String path) {
-        String value = get(path);
-        return value != null ? value : "";
-    }
+    public abstract String getString(String path);
 
-    public double getDouble(String path) {
-        Object value = get(path);
-        if (value instanceof Double) {
-            return ((Double) value).floatValue();
-        } else if (value instanceof Float) {
-            return (Float) value;
-        } else if (value instanceof BigDecimal) {
-            return ((BigDecimal) value).floatValue();
-        } else {
-            return 0F;
-        }
-    }
+    public abstract double getDouble(String path);
 
-    public boolean getBoolean(String path) {
-        Boolean value = get(path);
-        return value != null ? value : false;
-    }
+    public abstract boolean getBoolean(String path);
 
-    public long getLong(String path) {
-        Object value = get(path);
-        if (value instanceof Integer) {
-            return ((Integer) value).longValue();
-        } else if (value instanceof Long) {
-            return (Long) value;
-        } else {
-            return 0L;
-        }
-    }
+    public abstract long getLong(String path);
 
-    public float getFloat(String path) {
-        Object value = get(path);
-        if (value instanceof Double) {
-            return ((Double) value).floatValue();
-        } else if (value instanceof Float) {
-            return (Float) value;
-        } else if (value instanceof BigDecimal) {
-            return ((BigDecimal) value).floatValue();
-        } else {
-            return 0F;
-        }
-    }
+    public abstract float getFloat(String path);
 
-    public char getChar(String path) {
-        Object value = get(path);
-        if (value instanceof String) {
-            String stringValue = (String) value;
-            if (stringValue.length() == 1) {
-                return stringValue.charAt(0);
-            }
-        }
-        return '\u0000';
-    }
+    public abstract char getChar(String path);
+
+    public abstract List<String> getStringList(String path);
+
+    public abstract List<Integer> getIntList(String path);
+
+    public abstract List<Double> getDoubleList(String path);
 
     public boolean contains(String path) {
         return get(path) != null;

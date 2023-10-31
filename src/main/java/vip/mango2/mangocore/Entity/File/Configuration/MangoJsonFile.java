@@ -4,12 +4,12 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import vip.mango2.mangocore.Entity.File.MangoConfiguration;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.List;
 
 public class MangoJsonFile extends MangoConfiguration {
 
@@ -22,7 +22,7 @@ public class MangoJsonFile extends MangoConfiguration {
 
     @Override
     public void onLoad(File file) throws IOException {
-        try (FileReader reader = new FileReader(file)) {
+        try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(file.toPath()), StandardCharsets.UTF_8)) {
             jsonConfig = JSON.parseObject(reader, JSONObject.class);
         }
     }
@@ -40,26 +40,65 @@ public class MangoJsonFile extends MangoConfiguration {
         jsonConfig.put(path, value);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> T get(String path, Class<T> def) {
-        if (def == null) {
-            return (T) jsonConfig.get(path);
-        }
-
-        T value = (T) jsonConfig.getObject(path, def);
-        if (value != null) {
-            return value;
-        }
-
-        try {
-            return def.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException("无法创建 " + def.getName() + " 的实例", e);
-        }
+    public Object get(String path) {
+        return jsonConfig.get(path);
     }
 
+    @Override
+    public <T> T get(String path, Class<T> def) {
+        return jsonConfig.getObject(path, def);
+    }
+
+    @Override
+    public int getInt(String path) {
+        return jsonConfig.getInteger(path);
+    }
+
+    @Override
     public String getString(String path) {
         return jsonConfig.getString(path);
     }
+
+    @Override
+    public double getDouble(String path) {
+        return jsonConfig.getDouble(path);
+    }
+
+    @Override
+    public boolean getBoolean(String path) {
+        return jsonConfig.getBoolean(path);
+    }
+
+    @Override
+    public long getLong(String path) {
+        return jsonConfig.getLong(path);
+    }
+
+    @Override
+    public float getFloat(String path) {
+        return jsonConfig.getFloat(path);
+    }
+
+    @Override
+    public char getChar(String path) {
+        return jsonConfig.getString(path).charAt(0);
+    }
+
+    @Override
+    public List<String> getStringList(String path) {
+        return jsonConfig.getJSONArray(path).toJavaList(String.class);
+    }
+
+    @Override
+    public List<Integer> getIntList(String path) {
+        return jsonConfig.getJSONArray(path).toJavaList(Integer.class);
+    }
+
+    @Override
+    public List<Double> getDoubleList(String path) {
+        return jsonConfig.getJSONArray(path).toJavaList(Double.class);
+    }
+
+
 }

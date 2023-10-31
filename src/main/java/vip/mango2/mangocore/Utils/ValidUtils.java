@@ -1,5 +1,10 @@
 package vip.mango2.mangocore.Utils;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,5 +40,19 @@ public class ValidUtils {
             return m.group();
         }
         return null;
+    }
+
+    public static boolean isCustomObject(Class<?> clazz) {
+        // 检查是否为基本类型或包装类
+        List<Class<?>> basicClassTypes = Arrays.asList(
+                Integer.class, Double.class, Float.class,
+                Long.class, Boolean.class,  String.class,
+                BigDecimal.class,  Character.class
+        );
+
+        return !clazz.isPrimitive()
+                && basicClassTypes.stream().noneMatch(nonCustomClass -> nonCustomClass.isAssignableFrom(clazz))
+                && !Collection.class.isAssignableFrom(clazz)
+                && !Map.class.isAssignableFrom(clazz);
     }
 }

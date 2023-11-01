@@ -9,6 +9,8 @@ import vip.mango2.mangocore.Utils.ValidUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,35 +42,72 @@ public class MangoYamlFile extends MangoConfiguration {
     @Override
     public <T> T get(String path, Class<T> clazz) {
         Object rawData = yamlConfig.get(path);
+        return getObjectByMap(rawData, clazz);
+    }
+
+    public <T> List<T> getList(String path, Class<T> clazz) {
+        Object rawData = yamlConfig.get(path);
+        if (rawData == null) {
+            return null;
+        }
+
+        if (!(rawData instanceof List<?>)) {
+            throw new RuntimeException("配置项 " + path + " 不是一个列表");
+        }
+
+        List<T> resultList = new ArrayList<>();
+        List<?> rawList = (List<?>) rawData;
+        for (Object item : rawList) {
+            if (item == null) {
+                resultList.add(null);
+            } else if (ValidUtils.isCustomObject(clazz)) {
+                // 递归处理自定义对象
+                resultList.add(getObjectByMap(item, clazz));
+            } else {
+                resultList.add(clazz.cast(item));
+            }
+        }
+        return resultList;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private <T> T getObjectByMap(Object rawData, Class<T> clazz) {
         if (rawData == null) {
             return null;
         }
 
         try {
             T instance = clazz.newInstance();
+            Map<String, Object> dataMap;
             if (rawData instanceof ConfigurationSection) {
                 ConfigurationSection section = (ConfigurationSection) rawData;
-                Map<String, Object> dataMap = section.getValues(false);
-                for (Field field : clazz.getDeclaredFields()) {
-                    field.setAccessible(true);
-                    Object value = dataMap.get(field.getName());
-                    if (value != null) {
-                        if (ValidUtils.isCustomObject(field.getType())) {
-                            // 递归多层对象
-                            Object customObject = get(section.getCurrentPath() + "." + field.getName(), field.getType());
-                            field.set(instance, customObject);
-                        } else {
-                            field.set(instance, value);
-                        }
+                dataMap = section.getValues(false);
+            } else if (rawData instanceof Map<?, ?>) {
+                dataMap = (Map<String, Object>) rawData;
+            } else {
+                throw new IllegalArgumentException("无法处理的原始数据类型: " + rawData.getClass().getName());
+            }
+
+            for (Field field : clazz.getDeclaredFields()) {
+                field.setAccessible(true);
+                Object value = dataMap.get(field.getName());
+                if (value != null) {
+                    if (ValidUtils.isCustomObject(field.getType())) {
+                        // 递归处理自定义对象
+                        Object customObject = getObjectByMap(value, field.getType());
+                        field.set(instance, customObject);
+                    } else {
+                        field.set(instance, value);
                     }
                 }
             }
+
             return instance;
         } catch (Exception e) {
-            throw new RuntimeException("无法将 " + rawData.getClass().getName() + " 转换为 " + clazz.getName(), e);
+            throw new RuntimeException("无法从原始数据转换对象 " + clazz.getName(), e);
         }
     }
-
 
     @Override
     public void onSave(File file) throws IOException {
@@ -128,6 +167,21 @@ public class MangoYamlFile extends MangoConfiguration {
     @Override
     public void set(String path, Object value) {
         yamlConfig.set(path, value);
+    }
+
+    @Override
+    public <T> Map<String, T> getStringMap(String path, Class<T> clazz) {
+        ConfigurationSection section = yamlConfig.getConfigurationSection(path);
+        if (section == null) {
+            return null;
+        }
+
+        Map<String, T> resultMap = new HashMap<>();
+        for (String key : section.getKeys(false)) {
+            T value = get(path + "." + key, clazz);
+            resultMap.put(key, value);
+        }
+        return resultMap;
     }
 
     public void loadFromString(String string) throws InvalidConfigurationException {

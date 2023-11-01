@@ -2,6 +2,7 @@ package vip.mango2.mangocore.Entity.File.Configuration;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
 import vip.mango2.mangocore.Entity.File.MangoConfiguration;
 
 import java.io.*;
@@ -9,7 +10,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MangoJsonFile extends MangoConfiguration {
 
@@ -86,6 +89,11 @@ public class MangoJsonFile extends MangoConfiguration {
     }
 
     @Override
+    public <T> List<T> getList(String path, Class<T> def) {
+        return jsonConfig.getJSONArray(path).toJavaList(def);
+    }
+
+    @Override
     public List<String> getStringList(String path) {
         return jsonConfig.getJSONArray(path).toJavaList(String.class);
     }
@@ -100,5 +108,17 @@ public class MangoJsonFile extends MangoConfiguration {
         return jsonConfig.getJSONArray(path).toJavaList(Double.class);
     }
 
-
+    @Override
+    public <T> Map<String, T> getStringMap(String path, Class<T> def) {
+        JSONObject jsonObject = jsonConfig.getJSONObject(path);
+        if (jsonObject != null) {
+            Map<String, T> resultMap = new HashMap<>();
+            for (String key : jsonObject.keySet()) {
+                T value = jsonObject.getObject(key, def);
+                resultMap.put(key, value);
+            }
+            return resultMap;
+        }
+        return null;
+    }
 }

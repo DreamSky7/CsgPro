@@ -3,6 +3,7 @@ package vip.mango2.mangocore.Entity.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class MangoConfiguration extends MangoFile{
@@ -41,6 +42,10 @@ public abstract class MangoConfiguration extends MangoFile{
     public abstract List<Integer> getIntList(String path);
 
     public abstract List<Double> getDoubleList(String path);
+
+    public abstract <T> List<T> getList(String path, Class<T> def);
+
+    public abstract <T> Map<String, T> getStringMap(String path, Class<T> def);
 
     public boolean contains(String path) {
         return get(path) != null;

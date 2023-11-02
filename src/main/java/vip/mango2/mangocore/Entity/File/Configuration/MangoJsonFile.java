@@ -121,4 +121,18 @@ public class MangoJsonFile extends MangoConfiguration {
         }
         return null;
     }
+
+    @Override
+    public <T> Map<String, List<T>> getStringMapList(String path, Class<T> def) {
+        JSONObject jsonObject = jsonConfig.getJSONObject(path);
+        if (jsonObject != null) {
+            Map<String, List<T>> resultMap = new HashMap<>();
+            for (String key : jsonObject.keySet()) {
+                List<T> value = jsonObject.getJSONArray(key).toJavaList(def);
+                resultMap.put(key, value);
+            }
+            return resultMap;
+        }
+        return null;
+    }
 }

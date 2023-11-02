@@ -47,6 +47,8 @@ public abstract class MangoConfiguration extends MangoFile{
 
     public abstract <T> Map<String, T> getStringMap(String path, Class<T> def);
 
+    public abstract <T> Map<String, List<T>> getStringMapList(String path, Class<T> def);
+
     public boolean contains(String path) {
         return get(path) != null;
     }

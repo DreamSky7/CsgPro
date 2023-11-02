@@ -17,4 +17,9 @@
 * #### 1.0.5
   - 对消息工具类进行了重新设计，该版本与前版本有较大差距，无法平替。
   - 重新设计文件管理器，并引入了自创建的MangoFile类，支持Yaml和Json文件的读写
+  - 对于配置文件推荐使用MangoConfiguration对象进行读取，以下是已支持的结构读取
+    * `Object` [包括Object内部的List<Object>和Object结构的读取]
+    * `List<Object>`
+    * `Map<String, Object>`
+    * `Map<String, List<Object>>`
   - **感谢千千一路上的帮助，我直接就是原地结婚**

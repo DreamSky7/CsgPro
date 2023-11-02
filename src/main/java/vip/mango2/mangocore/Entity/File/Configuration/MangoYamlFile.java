@@ -9,6 +9,7 @@ import vip.mango2.mangocore.Utils.ValidUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,6 +81,7 @@ public class MangoYamlFile extends MangoConfiguration {
         try {
             T instance = clazz.newInstance();
             Map<String, Object> dataMap;
+
             if (rawData instanceof ConfigurationSection) {
                 ConfigurationSection section = (ConfigurationSection) rawData;
                 dataMap = section.getValues(false);
@@ -97,7 +99,24 @@ public class MangoYamlFile extends MangoConfiguration {
                         // 递归处理自定义对象
                         Object customObject = getObjectByMap(value, field.getType());
                         field.set(instance, customObject);
+                    } else if (List.class.isAssignableFrom(field.getType())) {
+                        // 处理 List 类型字段
+                        List<Object> listValue = new ArrayList<>();
+                        ParameterizedType listType = (ParameterizedType) field.getGenericType();
+                        Class<?> listItemType = (Class<?>) listType.getActualTypeArguments()[0];
+
+                        for (Object item : (List<?>) value) {
+                            if (ValidUtils.isCustomObject(listItemType)) {
+                                // 递归处理 List 中的自定义对象
+                                Object listItem = getObjectByMap(item, listItemType);
+                                listValue.add(listItem);
+                            } else {
+                                listValue.add(item);
+                            }
+                        }
+                        field.set(instance, listValue);
                     } else {
+                        // 处理普通字段
                         field.set(instance, value);
                     }
                 }
@@ -179,6 +198,21 @@ public class MangoYamlFile extends MangoConfiguration {
         Map<String, T> resultMap = new HashMap<>();
         for (String key : section.getKeys(false)) {
             T value = get(path + "." + key, clazz);
+            resultMap.put(key, value);
+        }
+        return resultMap;
+    }
+
+    @Override
+    public <T> Map<String, List<T>> getStringMapList(String path, Class<T> def) {
+        ConfigurationSection section = yamlConfig.getConfigurationSection(path);
+        if (section == null) {
+            return null;
+        }
+
+        Map<String, List<T>> resultMap = new HashMap<>();
+        for (String key : section.getKeys(false)) {
+            List<T> value = getList(path + "." + key, def);
             resultMap.put(key, value);
         }
         return resultMap;

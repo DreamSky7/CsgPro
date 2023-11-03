@@ -12,6 +12,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import vip.mango2.mangocore.Entity.File.MangoConfiguration;
+import vip.mango2.mangocore.Manager.MangoFileManager;
 import vip.mango2.mangocore.MangoCore;
 
 import java.io.File;
@@ -114,7 +116,7 @@ public class MessageUtils {
      * @param key 配置文件中的key
      * @param sender 发送者
      */
-    public static void senderMessageByConfig(FileConfiguration fileConfiguration, CommandSender sender, String key) {
+    public static void senderMessageByConfig(MangoConfiguration fileConfiguration, CommandSender sender, String key) {
         senderMessageByConfig(fileConfiguration, key, sender, false, false, null);
     }
 
@@ -125,7 +127,7 @@ public class MessageUtils {
      * @param sender 发送者
      * @param isExpand 是否解析使用占位符
      */
-    public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, boolean isExpand) {
+    public static void senderMessageByConfig(MangoConfiguration fileConfiguration, String key, CommandSender sender, boolean isExpand) {
         senderMessageByConfig(fileConfiguration, key, sender, isExpand, false, null);
     }
 
@@ -137,7 +139,7 @@ public class MessageUtils {
      * @param usePlaceholder 是否解析使用占位符
      * @param isExpand 是否解析扩展
      */
-    public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, boolean isExpand, boolean usePlaceholder) {
+    public static void senderMessageByConfig(MangoConfiguration fileConfiguration, String key, CommandSender sender, boolean isExpand, boolean usePlaceholder) {
         senderMessageByConfig(fileConfiguration, key, sender, usePlaceholder, isExpand, null);
     }
 
@@ -149,7 +151,7 @@ public class MessageUtils {
      * @param usePlaceholder 是否解析使用占位符
      * @param isExpand 是否解析扩展
      */
-    public static void senderMessageByConfig(FileConfiguration fileConfiguration, String key, CommandSender sender, boolean isExpand, boolean usePlaceholder, Map<String, Object> params) {
+    public static void senderMessageByConfig(MangoConfiguration fileConfiguration, String key, CommandSender sender, boolean isExpand, boolean usePlaceholder, Map<String, Object> params) {
 
         if (fileConfiguration.get(key) == null)
             return;

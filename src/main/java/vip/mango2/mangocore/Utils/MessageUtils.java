@@ -6,20 +6,11 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import vip.mango2.mangocore.Entity.File.MangoConfiguration;
-import vip.mango2.mangocore.Manager.MangoFileManager;
-import vip.mango2.mangocore.MangoCore;
+import vip.mango2.mangocore.Entity.Configuration.MangoConfiguration;
 
-import java.io.File;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 消息相关的工具类

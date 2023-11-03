@@ -1,9 +1,8 @@
-package vip.mango2.mangocore.Entity.File.Configuration;
+package vip.mango2.mangocore.Entity.Configuration;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import vip.mango2.mangocore.Entity.File.MangoConfiguration;
 import vip.mango2.mangocore.Utils.ValidUtils;
 
 import java.io.File;
@@ -15,18 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MangoYamlFile extends MangoConfiguration {
+public class MangoYamlConfig extends MangoConfiguration {
 
-    private final YamlConfiguration yamlConfig;
-
-
-    public MangoYamlFile(String filePath) {
-        super(filePath);
-        this.yamlConfig = new YamlConfiguration();
-    }
+    private final YamlConfiguration yamlConfig = new YamlConfiguration();
 
     @Override
-    public void onLoad(File file) throws IOException {
+    public void Load(File file) throws IOException {
         try {
             yamlConfig.load(file);
         } catch (Exception e) {
@@ -129,59 +122,59 @@ public class MangoYamlFile extends MangoConfiguration {
     }
 
     @Override
-    public void onSave(File file) throws IOException {
+    public void Save(File file) throws IOException {
         yamlConfig.save(file);
     }
-
-    @Override
-    public int getInt(String path) {
-        return yamlConfig.getInt(path);
-    }
-
-    @Override
-    public String getString(String path) {
-        return yamlConfig.getString(path);
-    }
-
-    @Override
-    public double getDouble(String path) {
-        return yamlConfig.getDouble(path);
-    }
-
-    @Override
-    public boolean getBoolean(String path) {
-        return yamlConfig.getBoolean(path);
-    }
-
-    @Override
-    public long getLong(String path) {
-        return yamlConfig.getLong(path);
-    }
-
-    @Override
-    public float getFloat(String path) {
-        return (float) yamlConfig.getDouble(path);
-    }
-
-    @Override
-    public char getChar(String path) {
-        return yamlConfig.getString(path).charAt(0);
-    }
-
-    @Override
-    public List<String> getStringList(String path) {
-        return yamlConfig.getStringList(path);
-    }
-
-    @Override
-    public List<Integer> getIntList(String path) {
-        return yamlConfig.getIntegerList(path);
-    }
-
-    @Override
-    public List<Double> getDoubleList(String path) {
-        return yamlConfig.getDoubleList(path);
-    }
+//
+//    @Override
+//    public int getInt(String path) {
+//        return yamlConfig.getInt(path);
+//    }
+//
+//    @Override
+//    public String getString(String path) {
+//        return yamlConfig.getString(path);
+//    }
+//
+//    @Override
+//    public double getDouble(String path) {
+//        return yamlConfig.getDouble(path);
+//    }
+//
+//    @Override
+//    public boolean getBoolean(String path) {
+//        return yamlConfig.getBoolean(path);
+//    }
+//
+//    @Override
+//    public long getLong(String path) {
+//        return yamlConfig.getLong(path);
+//    }
+//
+//    @Override
+//    public float getFloat(String path) {
+//        return (float) yamlConfig.getDouble(path);
+//    }
+//
+//    @Override
+//    public char getChar(String path) {
+//        return yamlConfig.getString(path).charAt(0);
+//    }
+//
+//    @Override
+//    public List<String> getStringList(String path) {
+//        return yamlConfig.getStringList(path);
+//    }
+//
+//    @Override
+//    public List<Integer> getIntList(String path) {
+//        return yamlConfig.getIntegerList(path);
+//    }
+//
+//    @Override
+//    public List<Double> getDoubleList(String path) {
+//        return yamlConfig.getDoubleList(path);
+//    }
 
     @Override
     public void set(String path, Object value) {
@@ -189,7 +182,7 @@ public class MangoYamlFile extends MangoConfiguration {
     }
 
     @Override
-    public <T> Map<String, T> getStringMap(String path, Class<T> clazz) {
+    public <T> Map<String, T> getMap(String path, Class<T> clazz) {
         ConfigurationSection section = yamlConfig.getConfigurationSection(path);
         if (section == null) {
             return null;
@@ -204,7 +197,7 @@ public class MangoYamlFile extends MangoConfiguration {
     }
 
     @Override
-    public <T> Map<String, List<T>> getStringMapList(String path, Class<T> def) {
+    public <T> Map<String, List<T>> getMapList(String path, Class<T> def) {
         ConfigurationSection section = yamlConfig.getConfigurationSection(path);
         if (section == null) {
             return null;

@@ -13,23 +13,20 @@ import java.nio.charset.StandardCharsets;
 enum ResourceType{
     LOCAL, HTTP, INVALID
 }
+@Getter
 public class MangoFile{
 
     //工作空间，即MangoFileManager。
-    @Getter
     private final MangoConfigManager workSpace; //maybe only need a root path?
 
     //URL可以是本地文件或远程文件。
-    @Getter
     private final URL file_url;
 
     //资源类型，应由URL解析而来。
-    @Getter
     private final ResourceType resourceType;
 
     //如果为null，意味着没有load，否则意味着对应load类型。
-    @Getter
-    private MangoConfiguration configuration = null;
+    private final MangoConfiguration configuration = null;
 
     public MangoFile(MangoConfigManager workSpace, URL url){
         this.workSpace = workSpace;
@@ -190,8 +187,8 @@ public class MangoFile{
     }
     /**
      * 重写equals便于Set.contains比较
-     * @param o
-     * @return
+     * @param o 比较对象
+     * @return 是否相等
      */
     public boolean equals(Object o){
         if(o instanceof MangoFile){

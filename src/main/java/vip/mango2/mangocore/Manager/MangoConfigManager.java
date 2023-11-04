@@ -22,7 +22,7 @@ public class MangoConfigManager {
     @Getter
     public final String workPath;
 
-    private final Map<MangoFile, MangoConfiguration> file_cache = new HashMap();
+    private final Map<MangoFile, MangoConfiguration> file_cache = new HashMap<>();
 
     public MangoConfigManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -51,6 +51,7 @@ public class MangoConfigManager {
      * @param type 配置文件类型
      * @return 配置文件
      */
+    @SuppressWarnings("unchecked")
     public <T extends MangoConfiguration> T loadConfig(URL url, Class<T> type) {
         MangoFile mangoFile = new MangoFile(this, url);
 

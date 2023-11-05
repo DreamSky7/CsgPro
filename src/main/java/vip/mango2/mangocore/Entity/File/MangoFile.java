@@ -2,200 +2,57 @@ package vip.mango2.mangocore.Entity.File;
 
 import lombok.Getter;
 import vip.mango2.mangocore.Entity.Configuration.MangoConfiguration;
-import vip.mango2.mangocore.Manager.MangoConfigManager;
-import vip.mango2.mangocore.Utils.MessageUtils;
+import vip.mango2.mangocore.Manager.MangoWorkspace;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
-enum ResourceType{
-    LOCAL, HTTP, INVALID
-}
 @Getter
 public class MangoFile{
 
     //工作空间，即MangoFileManager。
-    private final MangoConfigManager workSpace; //maybe only need a root path?
+    private final MangoWorkspace workSpace; //maybe only need a root path?
 
     //URL可以是本地文件或远程文件。
-    private final URL file_url;
+    private final File file;
 
-    //资源类型，应由URL解析而来。
-    private final ResourceType resourceType;
-
-    //如果为null，意味着没有load，否则意味着对应load类型。
-    private final MangoConfiguration configuration = null;
-
-    public MangoFile(MangoConfigManager workSpace, URL url){
+    public MangoFile(MangoWorkspace workSpace, String local_path) {
         this.workSpace = workSpace;
-        this.file_url = url;
-        System.out.println("获取的类型是:" + parseResourceType(url));
-        this.resourceType = parseResourceType(url);
-    }
-
-    private ResourceType parseResourceType(URL url){
-        if(url.getProtocol().equals("file")){
-            return ResourceType.LOCAL;
-        }
-        if(url.getProtocol().equals("http") || url.getProtocol().equals("https")){
-            return ResourceType.HTTP;
-        }
-        return ResourceType.INVALID;
-    }
-
-
-    private void autoCreateFile(File file, boolean isDirectory){
-        //if exist, then ignore.
-        if(file.exists()){
-            return;
-        }
-        //recursively create parent.
-        if(!file.getParentFile().exists()){
-            autoCreateFile(file.getParentFile(), true);
-        }
-        if(!file.exists() && isDirectory){
-            file.mkdir();
-            return;
-        }
-        //saveSource.
-        if(!file.exists()){
-            workSpace.plugin.saveResource(file.getName(), false);
-        }
-        //saveSource failed: create new.
-        if(!file.exists()){
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private File constructTempFile() throws IOException {
-        String tmp_name = ".temp/."+file_url.toString().hashCode();
-        File tmp = new File(workSpace.workPath, tmp_name);
-        if(tmp.exists()){
-            tmp.delete();
-        }
-        autoCreateFile(tmp,false);
-        tmp.deleteOnExit();
-        return tmp;
+        this.file = new File(workSpace.workPath, local_path);
     }
 
     /**
-     * 读取特定格式配置
+     * 提醒：返回值可能为null。
      * @param def
      * @return
      * @param <T>
+     * @throws IOException
      */
-    public <T extends MangoConfiguration> T load(Class<T> def){
+    public <T extends MangoConfiguration> T load(Class<T> def) throws IOException {
 
-        File file = null;
-        switch(resourceType){
-            case HTTP:
-                file = readHTTP();
-                break;
-            case LOCAL:
-                System.out.println("正在加载本地文件");
-                file = readLocal();
-                break;
-        }
-
-        if(file == null){
-            return null;
-        }
         try {
-            T instance = def.getConstructor().newInstance();
-            instance.Load(file);
-            return instance;
-        } catch (Exception e) {
-            e.printStackTrace();
+            T conf = def.getConstructor().newInstance();
+            //文件不存在则会返回null
+            if(file.exists()){
+                InputStream ir = Files.newInputStream(file.toPath());
+                conf.Load(ir);
+                return conf;
+            }
+        } catch (Exception ignored) {
         }
         return null;
     }
-
-    /**
-     * 根据相对路径加载一个文件。
-     */
-    private File readLocal(){
-        System.out.println(file_url.getFile());
-        return new File(file_url.getFile());
-    }
-
-    /**
-     * 根据HTTP资源URL加载一个文件。
-     */
-    private File readHTTP(){
-
-        File file_construct;
-        HttpURLConnection connection;
-
-        try {
-            file_construct = constructTempFile();
-
-            connection = (HttpURLConnection) file_url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(5000);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        try (
-                FileWriter writer = new FileWriter(file_construct);
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))
-        ) {
-            String line;
-            while ((line = in.readLine()) != null) {
-                writer.append(line).append("\n");
-            }
-        } catch (IOException e) {
-            MessageUtils.consoleMessage("&7从URL中读取配置文件时出现错误: &c" + e.getMessage());
-        }
-
-        return file_construct;
-    }
-
-
-    /**
-     * 保存特定格式配置
-     * @param conf
-     * @param <T>
-     * @throws IOException
-     */
     public <T extends MangoConfiguration> void save(T conf) throws IOException {
-        File file = null;
-
-        switch(resourceType){
-            case LOCAL:
-                file = new File(file_url.getFile());
-                break;
-            case HTTP:
-                file = constructTempFile();
-                break;
-            case INVALID:
-                MessageUtils.consoleMessage("&7Try saving invalid resource: &c" + file_url);
-        }
-        if(file == null) return;
-
-        conf.Save(file);
-
-        if(resourceType == ResourceType.HTTP){
-            //要不要把数据上传到云端, 你看着办
-            MessageUtils.consoleMessage("&7Uploading to cloud not supported yet! &c" + file_url);
-        }
+        OutputStream wr = Files.newOutputStream(file.toPath());
+        conf.Save(wr);
     }
 
     /**
      * 删库跑路(bushi)
      */
     public void delete(){
-        if(resourceType == ResourceType.LOCAL){
-            File file = new File(file_url.getFile());
-            if(file.exists()){
-                file.delete();
-            }
+        if(file.exists()){
+            file.delete();
         }
     }
     /**
@@ -207,7 +64,7 @@ public class MangoFile{
         if(o instanceof MangoFile){
             MangoFile oth = (MangoFile) o;
             return oth.workSpace == this.workSpace &&
-                    oth.file_url.sameFile(this.file_url);
+                    oth.file.getAbsolutePath().equals(this.file.getAbsolutePath());
         }
         return false;
     }

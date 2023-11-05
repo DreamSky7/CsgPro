@@ -1,14 +1,17 @@
 package vip.mango2.mangocore.Entity.Configuration;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import vip.mango2.mangocore.Utils.ValidUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,11 +22,11 @@ public class MangoYamlConfig extends MangoConfiguration {
     private final YamlConfiguration yamlConfig = new YamlConfiguration();
 
     @Override
-    public void Load(File file) throws IOException {
-        try {
-            yamlConfig.load(file);
+    public void Load(InputStream stream) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+            yamlConfig.load(reader);
         } catch (Exception e) {
-            throw new IOException("Yaml文件加载失败，文件名称 [" + file.getName() + "]", e);
+            throw new IOException("Yaml文件加载失败。", e);
         }
     }
 
@@ -122,8 +125,12 @@ public class MangoYamlConfig extends MangoConfiguration {
     }
 
     @Override
-    public void Save(File file) throws IOException {
-        yamlConfig.save(file);
+    public void Save(OutputStream stream) throws IOException {
+        try (OutputStreamWriter writer = new OutputStreamWriter(stream)) {
+            String obj = yamlConfig.saveToString();
+            writer.write(obj);
+        }
+
     }
 //
 //    @Override

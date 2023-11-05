@@ -15,16 +15,15 @@ public class MangoJsonConfig extends MangoConfiguration {
     private JSONObject jsonConfig = new JSONObject();
 
     @Override
-    public void Load(File file) throws IOException {
-        System.out.println("json读取的路径:" + file.toPath());
-        try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(file.toPath()), StandardCharsets.UTF_8)) {
+    public void Load(InputStream stream) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             jsonConfig = JSON.parseObject(reader, JSONObject.class);
         }
     }
 
     @Override
-    public void Save(File file) throws IOException {
-        try (FileWriter writer = new FileWriter(file)) {
+    public void Save(OutputStream stream) throws IOException {
+        try (OutputStreamWriter writer = new OutputStreamWriter(stream)) {
             writer.write(jsonConfig.toJSONString());
             writer.flush();
         }

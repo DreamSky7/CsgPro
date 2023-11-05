@@ -2,6 +2,8 @@ package vip.mango2.mangocore.Entity.Configuration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -73,16 +75,14 @@ public abstract class MangoConfiguration{
 
     /**
      * 加载配置文件
-     * @param file
      * @throws IOException IO异常
      */
-    public abstract void Load(File file) throws IOException;
+    public abstract void Load(InputStream source_stream) throws IOException;
 
     /**
      * 保存配置文件
-     * @param file
      * @throws IOException
      */
-    public abstract void Save(File file) throws IOException;
+    public abstract void Save(OutputStream source_stream) throws IOException;
 
 }

@@ -16,6 +16,7 @@ public class MangoJsonConfig extends MangoConfiguration {
 
     @Override
     public void Load(File file) throws IOException {
+        System.out.println("json读取的路径:" + file.toPath());
         try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(file.toPath()), StandardCharsets.UTF_8)) {
             jsonConfig = JSON.parseObject(reader, JSONObject.class);
         }

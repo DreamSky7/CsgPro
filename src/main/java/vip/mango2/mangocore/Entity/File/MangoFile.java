@@ -31,7 +31,18 @@ public class MangoFile{
     public MangoFile(MangoConfigManager workSpace, URL url){
         this.workSpace = workSpace;
         this.file_url = url;
-        this.resourceType = ResourceType.INVALID; //TODO: 通过url解析resourceType.
+        System.out.println("获取的类型是:" + parseResourceType(url));
+        this.resourceType = parseResourceType(url);
+    }
+
+    private ResourceType parseResourceType(URL url){
+        if(url.getProtocol().equals("file")){
+            return ResourceType.LOCAL;
+        }
+        if(url.getProtocol().equals("http") || url.getProtocol().equals("https")){
+            return ResourceType.HTTP;
+        }
+        return ResourceType.INVALID;
     }
 
 
@@ -87,6 +98,7 @@ public class MangoFile{
                 file = readHTTP();
                 break;
             case LOCAL:
+                System.out.println("正在加载本地文件");
                 file = readLocal();
                 break;
         }
@@ -108,6 +120,7 @@ public class MangoFile{
      * 根据相对路径加载一个文件。
      */
     private File readLocal(){
+        System.out.println(file_url.getFile());
         return new File(file_url.getFile());
     }
 

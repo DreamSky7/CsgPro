@@ -39,6 +39,8 @@ public class MangoConfigManager {
     public <T extends MangoConfiguration> T loadConfig(String filePath, Class<T> type) {
         try {
             File f = new File(filePath);
+            System.out.println("查看路径文件:" + f);
+            System.out.println("查看路径属性:" + f.toURI().toURL());
             return loadConfig(f.toURI().toURL(), type);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);

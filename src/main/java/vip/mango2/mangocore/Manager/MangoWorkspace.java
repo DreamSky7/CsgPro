@@ -52,7 +52,7 @@ public class MangoWorkspace {
          */
     public <T extends MangoConfiguration> T loadFile(String localPath, Class<T> type) {
         try {
-            return loadFile(localPath, type, new URL("plugin:///"+localPath));
+            return loadFile(localPath, type, new URL("jar:///"+localPath));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -131,7 +131,7 @@ public class MangoWorkspace {
             ));
             space.saveFile("config.yml");
 
-            space.loadResource(new URL("plugin:///config.json"), MangoJsonConfig.class);
+            space.loadResource(new URL("jar:///config.json"), MangoJsonConfig.class);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

@@ -54,49 +54,10 @@ public class MangoResource{
         if(url.getProtocol().equals("http") || url.getProtocol().equals("https")){
             return ResourceType.HTTP;
         }
-        if(url.getProtocol().equals("plugin")){
+        if(url.getProtocol().equals("jar")){
             return ResourceType.PLUGIN;
         }
         return ResourceType.INVALID;
-    }
-
-
-    private void autoCreateFile(File file, boolean isDirectory){
-        //if exist, then ignore.
-        if(file.exists()){
-            return;
-        }
-        //recursively create parent.
-        if(!file.getParentFile().exists()){
-            autoCreateFile(file.getParentFile(), true);
-        }
-        if(!file.exists() && isDirectory){
-            file.mkdir();
-            return;
-        }
-        //saveSource.
-        if(!file.exists()){
-            workSpace.plugin.saveResource(file.getName(), false);
-        }
-        //saveSource failed: create new.
-        if(!file.exists()){
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private File constructTempFile() throws IOException {
-        String tmp_name = ".temp/."+file_url.toString().hashCode();
-        File tmp = new File(workSpace.workPath, tmp_name);
-        if(tmp.exists()){
-            tmp.delete();
-        }
-        autoCreateFile(tmp,false);
-        tmp.deleteOnExit();
-        return tmp;
     }
 
     /**

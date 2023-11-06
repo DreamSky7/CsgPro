@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import vip.mango2.mangocore.Entity.Configuration.MangoConfiguration;
 import vip.mango2.mangocore.Manager.MangoWorkspace;
+import vip.mango2.mangocore.Utils.MessageUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -118,6 +119,7 @@ public class MangoResource{
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(5000);
         } catch (IOException e) {
+            MessageUtils.consoleMessage("加载配置文件失败: "+file_url);
             throw new RuntimeException(e);
         }
 

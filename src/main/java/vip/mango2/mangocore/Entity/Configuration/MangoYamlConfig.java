@@ -96,6 +96,9 @@ public class MangoYamlConfig extends MangoConfiguration {
                         Object customObject = getObjectByMap(value, field.getType());
                         field.set(instance, customObject);
                     } else if (List.class.isAssignableFrom(field.getType())) {
+
+                        System.out.println("检测确实属性为List对象");
+
                         // 处理 List 类型字段
                         List<Object> listValue = new ArrayList<>();
                         ParameterizedType listType = (ParameterizedType) field.getGenericType();

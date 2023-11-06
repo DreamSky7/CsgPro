@@ -2,6 +2,7 @@ package vip.mango2.mangocore.Entity.Configuration;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -23,8 +24,9 @@ public class MangoJsonConfig extends MangoConfiguration {
 
     @Override
     public void Save(OutputStream stream) throws IOException {
-        try (OutputStreamWriter writer = new OutputStreamWriter(stream)) {
-            writer.write(jsonConfig.toJSONString());
+        String prettyJsonString = JSON.toJSONString(jsonConfig, JSONWriter.Feature.PrettyFormat);
+        try (OutputStreamWriter writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8)) {
+            writer.write(prettyJsonString);
             writer.flush();
         }
     }
@@ -81,7 +83,10 @@ public class MangoJsonConfig extends MangoConfiguration {
 
     @Override
     public <T> List<T> getList(String path, Class<T> def) {
-        return jsonConfig.getJSONArray(path).toJavaList(def);
+        if (jsonConfig.getJSONArray(path) != null) {
+            return jsonConfig.getJSONArray(path).toJavaList(def);
+        }
+        return null;
     }
 //
 //    @Override

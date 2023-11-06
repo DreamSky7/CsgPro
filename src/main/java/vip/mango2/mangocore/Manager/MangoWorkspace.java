@@ -69,13 +69,8 @@ public class MangoWorkspace {
     public <T extends MangoConfiguration> T loadFile(String localPath, Class<T> type) {
         String url = "file:///jar!/"+localPath;
         url = url.replace('\\','/');
-        try {
 
-            return loadFile(localPath, type, new URL(url));
-        } catch (MalformedURLException e) {
-            System.out.println("Invalid URL: "+url);
-            throw new RuntimeException(e);
-        }
+        return loadFile(localPath, type, url);
     }
 
     /**
@@ -86,7 +81,7 @@ public class MangoWorkspace {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T extends MangoConfiguration> T loadFile(String localPath, Class<T> type, URL source) {
+    public <T extends MangoConfiguration> T loadFile(String localPath, Class<T> type, String source) {
         MangoFile mangoFile = new MangoFile(this, localPath);
 
         //如果缓存中已存在且一致，直接返回。
@@ -103,7 +98,7 @@ public class MangoWorkspace {
         try {
             T conf = mangoFile.load(type);
             if(conf == null) {
-                MangoResource mango_source = new MangoResource(this,source);
+                MangoResource mango_source = new MangoResource(this,new URL(source));
                 conf = mango_source.load(type);
             }
 

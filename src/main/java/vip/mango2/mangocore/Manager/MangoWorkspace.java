@@ -44,6 +44,22 @@ public class MangoWorkspace {
         return msource.load(type);
     }
 
+    /**
+     * 加载一个资源，该加载不会在本地留下任何痕迹。
+     * @param type 配置文件类型
+     * @return 配置文件
+     */
+    public <T extends MangoConfiguration> T loadJarResource(String filename, Class<T> type) {
+        String url = "file:///jar!/"+filename;
+        url = url.replace('\\','/');
+        try {
+            return loadResource(new URL(url),type);
+        } catch (MalformedURLException e) {
+            System.out.println("Invalid URL: "+url);
+            throw new RuntimeException(e);
+        }
+    }
+
         /**
          * 加载本地文件，如果文件不存在则从插件JAR获取。
          * @param localPath 配置文件相对路径
@@ -51,9 +67,13 @@ public class MangoWorkspace {
          * @return 配置文件
          */
     public <T extends MangoConfiguration> T loadFile(String localPath, Class<T> type) {
+        String url = "file:///jar!/"+localPath;
+        url = url.replace('\\','/');
         try {
-            return loadFile(localPath, type, new URL("jar:///"+localPath));
+
+            return loadFile(localPath, type, new URL(url));
         } catch (MalformedURLException e) {
+            System.out.println("Invalid URL: "+url);
             throw new RuntimeException(e);
         }
     }
@@ -118,23 +138,9 @@ public class MangoWorkspace {
                 MessageUtils.consoleMessage("&c保存配置文件时出现错误");
                 throw new RuntimeException(e);
             }
+        }else{
+            System.out.println("Saving a non-exist file.");
         }
     }
 
-
-    public static void main(String[] args){
-        try {
-
-            MangoWorkspace space = new MangoWorkspace(null);
-            space.loadFile("config.yml", MangoYamlConfig.class, new URL(
-                    "https://portrait.gitee.com/MangoRabbit/mango-core/blob/45aabfc0c642ec3ec8cc7169a9ecd8b4612e6974/src/main/java/vip/mango2/mangocore/Entity/Configuration/MangoJsonConfig.java"
-            ));
-            space.saveFile("config.yml");
-
-            space.loadResource(new URL("jar:///config.json"), MangoJsonConfig.class);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
 }

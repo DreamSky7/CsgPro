@@ -49,13 +49,15 @@ public class MangoResource{
             return ResourceType.INVALID;
         }
         if(url.getProtocol().equals("file")){
-            return ResourceType.LOCAL;
+            if(url.getPath().contains("jar!/")){
+                return ResourceType.PLUGIN;
+            }else{
+                return ResourceType.LOCAL;
+            }
+
         }
         if(url.getProtocol().equals("http") || url.getProtocol().equals("https")){
             return ResourceType.HTTP;
-        }
-        if(url.getProtocol().equals("jar")){
-            return ResourceType.PLUGIN;
         }
         return ResourceType.INVALID;
     }
@@ -86,7 +88,7 @@ public class MangoResource{
                     file_stream = readLocal();
                     break;
                 case PLUGIN:
-                    file_stream = workSpace.plugin.getResource(file_url.getPath());
+                    file_stream = workSpace.plugin.getResource(file_url.getPath().split("jar!/")[1]);
             }
             if(file_stream != null){
                 instance.Load(file_stream);
@@ -137,5 +139,12 @@ public class MangoResource{
         }
         return false;
     }
-
+    /**
+     * equals前会先检查hashCode，因此重写。
+     * @return
+     */
+    @Override
+    public int hashCode() {
+        return 0;
+    }
 }

@@ -36,6 +36,7 @@ public class MangoFile{
             if(file.exists()){
                 InputStream ir = Files.newInputStream(file.toPath());
                 conf.Load(ir);
+                ir.close();
                 return conf;
             }
         } catch (Exception ignored) {
@@ -43,8 +44,11 @@ public class MangoFile{
         return null;
     }
     public <T extends MangoConfiguration> void save(T conf) throws IOException {
+        System.out.println("Saving: "+file.toPath());
+        System.out.println("Saving abs: "+file.toPath().toAbsolutePath());
         OutputStream wr = Files.newOutputStream(file.toPath());
         conf.Save(wr);
+        wr.close();
     }
 
     /**
@@ -69,4 +73,12 @@ public class MangoFile{
         return false;
     }
 
+    /**
+     * equals前会先检查hashCode，因此重写。
+     * @return
+     */
+    @Override
+    public int hashCode() {
+        return file.getAbsolutePath().hashCode();
+    }
 }

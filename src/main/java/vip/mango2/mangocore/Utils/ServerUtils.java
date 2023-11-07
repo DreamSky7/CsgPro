@@ -32,6 +32,23 @@ public class ServerUtils {
     }
 
     /**
+     * 获取系统分隔符
+     * @param operSystem 操作系统类型
+     * @return 分隔符
+     */
+    public static String getSplitChar(OperSystem operSystem) {
+        switch (operSystem) {
+            case WINDOWS:
+                return ";";
+            case LINUX:
+            case UNIX:
+            case MAC:
+                return ":";
+        }
+        return null;
+    }
+
+    /**
      * 获取核心文件列表
      * @return 核心文件列表
      */

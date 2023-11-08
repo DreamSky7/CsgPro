@@ -8,17 +8,29 @@ import java.io.*;
 import java.nio.file.Files;
 
 @Getter
-public class MangoFile{
+public class MangoFile extends MangoNode{
 
-    //工作空间，即MangoFileManager。
-    private final MangoWorkspace workSpace; //maybe only need a root path?
-
-    //URL可以是本地文件或远程文件。
-    private final File file;
 
     public MangoFile(MangoWorkspace workSpace, String local_path) {
-        this.workSpace = workSpace;
-        this.file = new File(workSpace.workPath, local_path);
+        super(workSpace, local_path);
+    }
+
+    protected MangoFile(MangoWorkspace workSpace, File file){
+        super(workSpace, file);
+    }
+    @Override
+    public void createNew() {
+        if(file.isDirectory()){
+            return;
+        }
+        if(file.exists()){
+            file.delete();
+        }
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -44,8 +56,6 @@ public class MangoFile{
         return null;
     }
     public <T extends MangoConfiguration> void save(T conf) throws IOException {
-        System.out.println("Saving: "+file.toPath());
-        System.out.println("Saving abs: "+file.toPath().toAbsolutePath());
         OutputStream wr = Files.newOutputStream(file.toPath());
         conf.Save(wr);
         wr.close();
@@ -55,30 +65,14 @@ public class MangoFile{
      * 删库跑路(bushi)
      */
     public void delete(){
-        if(file.exists()){
+        if(exists()){
             file.delete();
         }
     }
-    /**
-     * 重写equals便于Set.contains比较
-     * @param o 比较对象
-     * @return 是否相等
-     */
-    public boolean equals(Object o){
-        if(o instanceof MangoFile){
-            MangoFile oth = (MangoFile) o;
-            return oth.workSpace == this.workSpace &&
-                    oth.file.getAbsolutePath().equals(this.file.getAbsolutePath());
-        }
-        return false;
+
+    @Override
+    public boolean exists() {
+        return file.exists() && file.isFile();
     }
 
-    /**
-     * equals前会先检查hashCode，因此重写。
-     * @return
-     */
-    @Override
-    public int hashCode() {
-        return file.getAbsolutePath().hashCode();
-    }
 }

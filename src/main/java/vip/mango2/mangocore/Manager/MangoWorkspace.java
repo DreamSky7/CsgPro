@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import vip.mango2.mangocore.Entity.Configuration.MangoConfiguration;
 import vip.mango2.mangocore.Entity.Configuration.MangoJsonConfig;
 import vip.mango2.mangocore.Entity.Configuration.MangoYamlConfig;
+import vip.mango2.mangocore.Entity.File.MangoDirectory;
 import vip.mango2.mangocore.Entity.File.MangoFile;
 import vip.mango2.mangocore.Entity.File.MangoResource;
 import vip.mango2.mangocore.Utils.MessageUtils;
@@ -15,10 +16,30 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 
 public class MangoWorkspace {
+
+    private static final Set<MangoWorkspace> workspaces = new HashSet<>();
+
+    /**
+     * 获取插件对应的MangoWorkspace单例
+     * @param p
+     * @return
+     */
+    public static MangoWorkspace getWorkspace(JavaPlugin p){
+        for(MangoWorkspace space : workspaces){
+            if(space.plugin.getName().equals(p.getName())){
+                return space;
+            }
+        }
+        MangoWorkspace new_sp = new MangoWorkspace(p);
+        workspaces.add(new_sp);
+        return new_sp;
+    }
 
     @Getter
     public final JavaPlugin plugin;
@@ -28,7 +49,7 @@ public class MangoWorkspace {
 
     private final Map<MangoFile, MangoConfiguration> file_cache = new HashMap<>();
 
-    public MangoWorkspace(JavaPlugin plugin) {
+    private MangoWorkspace(JavaPlugin plugin) {
         this.plugin = plugin;
         this.workPath = plugin.getDataFolder().getAbsolutePath();
     }
@@ -71,6 +92,15 @@ public class MangoWorkspace {
         url = url.replace('\\','/');
 
         return loadFile(localPath, type, url);
+    }
+
+    /**
+     * 加载本地文件夹。
+     * @param localPath 相对路径
+     * @return 配置文件
+     */
+    public MangoDirectory loadDirectory(String localPath) {
+        return new MangoDirectory(this, localPath);
     }
 
     /**

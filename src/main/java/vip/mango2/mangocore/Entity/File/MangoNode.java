@@ -15,6 +15,10 @@ public abstract class MangoNode {
     public MangoNode(MangoWorkspace workSpace, String local_path) {
         this.workSpace = workSpace;
         this.file = new File(workSpace.workPath, local_path);
+        // 确保父级目录存在
+        if(!file.getParentFile().exists()){
+            file.getParentFile().mkdirs();
+        }
     }
 
     protected MangoNode(MangoWorkspace workSpace, File file){

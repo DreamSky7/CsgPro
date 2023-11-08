@@ -2,10 +2,7 @@ package vip.mango2.mangocore.Manager;
 
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 import vip.mango2.mangocore.Entity.Configuration.MangoConfiguration;
-import vip.mango2.mangocore.Entity.Configuration.MangoJsonConfig;
-import vip.mango2.mangocore.Entity.Configuration.MangoYamlConfig;
 import vip.mango2.mangocore.Entity.File.MangoDirectory;
 import vip.mango2.mangocore.Entity.File.MangoFile;
 import vip.mango2.mangocore.Entity.File.MangoResource;
@@ -90,7 +87,6 @@ public class MangoWorkspace {
     public <T extends MangoConfiguration> T loadFile(String localPath, Class<T> type) {
         String url = "file:///jar!/"+localPath;
         url = url.replace('\\','/');
-
         return loadFile(localPath, type, url);
     }
 

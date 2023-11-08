@@ -46,6 +46,7 @@ public class MangoResource{
     }
 
     private ResourceType parseResourceType(URL url){
+        System.out.println(url.toString());
         if(url == null){
             return ResourceType.INVALID;
         }
@@ -90,6 +91,7 @@ public class MangoResource{
                     break;
                 case PLUGIN:
                     file_stream = workSpace.plugin.getResource(file_url.getPath().split("jar!/")[1]);
+                    //workSpace.plugin.saveResource(file_url.getPath().split("jar!/")[1], false);
             }
             if(file_stream != null){
                 instance.Load(file_stream);
@@ -104,7 +106,7 @@ public class MangoResource{
      * 根据相对路径加载一个数据流。
      */
     private InputStream readLocal() throws IOException {
-        System.out.println(file_url.getFile());
+        System.out.println("获取的文件:" + file_url.getFile());
         return file_url.openStream();
     }
 

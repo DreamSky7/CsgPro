@@ -31,13 +31,7 @@ public final class MangoCore extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-
-
         fileManager = MangoWorkspace.getWorkspace(this);
-        MangoYamlConfig yamlConfig = fileManager.loadFile("playerData/test.yml", MangoYamlConfig.class);
-        fileManager.saveFile("playerData/test.yml");
-
-        //System.out.println("获取的版本是:" + yamlConfig.get("version"));
 
         MessageUtils.consoleMessage(PREFIX + "&7plugin enable &a[ SUCCESS ]");
 

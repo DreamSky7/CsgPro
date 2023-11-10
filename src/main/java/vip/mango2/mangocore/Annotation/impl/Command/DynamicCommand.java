@@ -10,6 +10,7 @@ import org.bukkit.command.TabExecutor;
 import vip.mango2.mangocore.Utils.MessageUtils;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,13 +36,13 @@ public class DynamicCommand extends Command {
 
     @Override
     public boolean execute(CommandSender sender, String label, String[] args) {
+
         try {
             return (boolean) method.invoke(instance, sender, args);
-        } catch (Exception e) {
-            e.printStackTrace();
-            MessageUtils.consoleMessage("执行指令出现了异常");
-            return false;
+        } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+            throw new RuntimeException(e);
         }
+
     }
 
     @SuppressWarnings("unchecked")
